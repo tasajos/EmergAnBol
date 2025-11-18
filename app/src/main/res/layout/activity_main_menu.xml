@@ -116,58 +116,33 @@
 
                 </LinearLayout>
             </HorizontalScrollView>
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Información Util"
+                android:text="Información Útil"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:layout_marginStart="20dp"
+                android:layout_marginTop="16dp"
                 android:textColor="@color/text_dark"/>
 
-            <androidx.cardview.widget.CardView
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                app:cardBackgroundColor="@color/card_bg_gray"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
+                android:scrollbars="none"
+                android:paddingVertical="8dp"
+                android:clipToPadding="false"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:id="@+id/info_cards_container"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Kits de Emergencia"
-                            android:textColor="@color/cat_blue"
-                            android:textStyle="bold"
-                            android:textSize="18sp"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Conoce las herramientas e insumos necesarios para un evento adverso"
-                            android:textColor="@color/cat_orange_real"
-                            android:layout_marginTop="8dp"/>
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:src="@android:drawable/ic_lock_lock"
-                        app:tint="@color/cat_green"
-                        android:layout_gravity="center"/>
+                    android:orientation="horizontal">
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </HorizontalScrollView>
+
 
             <TextView
                 android:layout_width="wrap_content"
