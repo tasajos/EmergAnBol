@@ -90,69 +90,32 @@
                     android:layout_gravity="center_vertical|start"
                     android:layout_marginStart="10dp"/>
             </androidx.cardview.widget.CardView>
-
+            <!-- Spinner Ciudad -->
             <Spinner
-                android:layout_width="150dp"
-                android:layout_height="40dp"
+                android:id="@+id/spinnerCiudad"
+                android:layout_width="180dp"
+                android:layout_height="50dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
-                android:background="@color/card_bg_gray"/>
+                android:background="@drawable/bg_spinner_elegant"
+                android:spinnerMode="dropdown"
+                android:elevation="2dp"/>
 
-            <LinearLayout
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="3"
-                android:padding="16dp">
+                android:scrollbars="none"
+                android:paddingVertical="8dp">
 
-                <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="110dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    app:cardBackgroundColor="@color/cat_green"
-                    app:cardCornerRadius="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Bomberos\nVoluntarios"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        android:layout_margin="8dp"/>
-                </androidx.cardview.widget.CardView>
+                <LinearLayout
+                    android:id="@+id/category_icons_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
 
-                <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="110dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    app:cardBackgroundColor="@color/cat_blue"
-                    app:cardCornerRadius="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ambulancias"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        android:layout_margin="8dp"/>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="110dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    app:cardBackgroundColor="@color/cat_orange_real"
-                    app:cardCornerRadius="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Hospitales"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        android:layout_margin="8dp"/>
-                </androidx.cardview.widget.CardView>
-            </LinearLayout>
+                </LinearLayout>
+            </HorizontalScrollView>
 
             <TextView
                 android:layout_width="wrap_content"
