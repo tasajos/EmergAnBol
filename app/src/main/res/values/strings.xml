@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">EmergenciaBoliviaCentral</string>
+    <string name="app_name">Emergencia Bolivia Central</string>
+    <string name="logo_desc">Logo de Emergencias Bolivia</string>
+    <string name="app_title">Emergencias de Bolivia</string>
+    <string name="app_subtitle">Conoce, Apoya y Reporta a las unidades de Emergencia de Bolivia</string>
+    <string name="btn_ingresar">INGRESAR</string>
 </resources>

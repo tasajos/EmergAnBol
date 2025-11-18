@@ -1,10 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+
+    <!-- Colores primarios para emergencias (rojo) -->
+    <color name="primary_color">#FFD32F2F</color>
+    <color name="primary_dark">#FFB71C1C</color>
+
+    <!-- Colores de texto -->
+    <color name="primary_text">#FF212121</color>
+    <color name="secondary_text">#FF757575</color>
+
+    <!-- Color para el botón -->
+    <color name="button_color">#FFD32F2F</color>
+    <color name="button_ingreso">#0C28F6</color>
+
+    <!-- Color para los estilos -->
+    <color name="primary_blue">#4A90E2</color>
+    <color name="bg_gray_light">#F5F5F5</color>
+    <color name="cat_green">#669966</color>
+    <color name="cat_blue">#5DADE2</color>
+    <color name="cat_orange">#F48FB1</color> <color name="cat_orange_real">#ED8A54</color>
+    <color name="card_bg_gray">#E0E0E0</color>
+    <color name="text_dark">#333333</color>
+    <color name="whatsapp_green">#25D366</color>
+    <color name="coord_blue">#7986CB</color>
+
 </resources>
