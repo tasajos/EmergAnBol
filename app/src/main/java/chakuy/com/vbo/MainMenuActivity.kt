@@ -21,6 +21,7 @@ class MainMenuActivity : AppCompatActivity() {
         setupSpinner()
         addCategoryIcons() // Los iconos cuadrados de arriba
         addInfoCards()     // Las nuevas tarjetas rectangulares de abajo
+        addGroupCards() // <-- ¡Añade esta línea!
     }
 
     private fun setupSpinner() {
@@ -71,6 +72,7 @@ class MainMenuActivity : AppCompatActivity() {
             container.addView(cardView)
         }
     }
+
 
     // --- NUEVA FUNCIÓN PARA INFORMACIÓN ÚTIL ---
     private fun addInfoCards() {
@@ -123,7 +125,45 @@ class MainMenuActivity : AppCompatActivity() {
             container.addView(cardView)
         }
     }
+
+
+    // --- NUEVA FUNCIÓN PARA GRUPOS DE INFORMACIÓN ---
+    private fun addGroupCards() {
+        val container: LinearLayout = findViewById(R.id.group_cards_container)
+
+        // Definición de las 3 tarjetas de grupo
+        val groupItems = listOf(
+            GroupItem("Grupo de Emergencia WhatsApp", R.drawable.whats), // Debes tener este PNG/Vector
+            GroupItem("Grupo de Información General", R.drawable.whats), // Debes tener este PNG/Vector
+            GroupItem("Contáctanos", R.drawable.whats) // Debes tener este PNG/Vector
+        )
+
+        val inflater = LayoutInflater.from(this)
+
+        for (item in groupItems) {
+            // Inflamos el layout de grupo
+            val cardView = inflater.inflate(R.layout.item_group_card, container, false) as CardView
+
+            val titleView: TextView = cardView.findViewById(R.id.group_title)
+            val iconView: ImageView = cardView.findViewById(R.id.group_icon)
+
+            titleView.text = item.title
+            iconView.setImageResource(item.iconResId)
+
+            // Opcional: Cambiar color de fondo si lo deseas, usando un color de tu colors.xml
+            cardView.setCardBackgroundColor(android.graphics.Color.parseColor("#7986CB")) // Usando coord_blue
+
+            cardView.setOnClickListener {
+                Toast.makeText(this, "Abriendo enlace para: ${item.title}", Toast.LENGTH_SHORT).show()
+                // Aquí iría el Intent para abrir el enlace de WhatsApp o la pantalla de Contacto
+            }
+
+            container.addView(cardView)
+        }
+    }
+
 }
 // Clases de datos al final del archivo
 data class CategoryItem(val name: String, val imageResId: Int, val bgColor: String)
 data class InfoItem(val title: String, val desc: String, val iconResId: Int)
+data class GroupItem(val title: String, val iconResId: Int)
