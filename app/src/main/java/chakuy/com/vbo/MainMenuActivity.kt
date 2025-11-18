@@ -151,7 +151,7 @@ class MainMenuActivity : AppCompatActivity() {
             iconView.setImageResource(item.iconResId)
 
             // Opcional: Cambiar color de fondo si lo deseas, usando un color de tu colors.xml
-            cardView.setCardBackgroundColor(android.graphics.Color.parseColor("#7986CB")) // Usando coord_blue
+            cardView.setCardBackgroundColor(android.graphics.Color.parseColor("#7986CB")) // Usano coord_blue
 
             cardView.setOnClickListener {
                 Toast.makeText(this, "Abriendo enlace para: ${item.title}", Toast.LENGTH_SHORT).show()
