@@ -12,6 +12,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import android.content.Intent
+import android.net.Uri
 
 class MainMenuActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,34 +133,87 @@ class MainMenuActivity : AppCompatActivity() {
     private fun addGroupCards() {
         val container: LinearLayout = findViewById(R.id.group_cards_container)
 
+        // Define la URL del grupo de emergencia aquí
+        val EMERGENCY_GROUP_URL = "https://chat.whatsapp.com/BHSQ5odTk61ARnyNJ3Kexl?mode=hqrt2"
+        val WHATSAPP_NUMBER = "+59170776212"
+        val CONTACT_MESSAGE = "Quiero consultar acerca de..."
+
         // Definición de las 3 tarjetas de grupo
         val groupItems = listOf(
-            GroupItem("Grupo de Emergencia WhatsApp", R.drawable.whats), // Debes tener este PNG/Vector
-            GroupItem("Grupo de Información General", R.drawable.whats), // Debes tener este PNG/Vector
-            GroupItem("Contáctanos", R.drawable.whats) // Debes tener este PNG/Vector
+            GroupItem("Grupo de Emergencia WhatsApp", R.drawable.whats),
+            GroupItem("Grupo de Información General", R.drawable.whats),
+            GroupItem("Contáctanos", R.drawable.whats) // El botón que vamos a modificar
         )
 
         val inflater = LayoutInflater.from(this)
 
         for (item in groupItems) {
-            // Inflamos el layout de grupo
             val cardView = inflater.inflate(R.layout.item_group_card, container, false) as CardView
-
             val titleView: TextView = cardView.findViewById(R.id.group_title)
             val iconView: ImageView = cardView.findViewById(R.id.group_icon)
 
             titleView.text = item.title
             iconView.setImageResource(item.iconResId)
 
-            // Opcional: Cambiar color de fondo si lo deseas, usando un color de tu colors.xml
-            cardView.setCardBackgroundColor(android.graphics.Color.parseColor("#7986CB")) // Usano coord_blue
+            cardView.setCardBackgroundColor(android.graphics.Color.parseColor("#7986CB"))
 
+            // --- LÓGICA CLICKEABLE CON CASOS DIFERENCIADOS ---
             cardView.setOnClickListener {
-                Toast.makeText(this, "Abriendo enlace para: ${item.title}", Toast.LENGTH_SHORT).show()
-                // Aquí iría el Intent para abrir el enlace de WhatsApp o la pantalla de Contacto
+                when (item.title) {
+                    "Grupo de Emergencia WhatsApp" -> {
+                        openUrl(EMERGENCY_GROUP_URL) // Abre el enlace de invitación
+                    }
+                    "Contáctanos" -> {
+                        openWhatsappContact(WHATSAPP_NUMBER, CONTACT_MESSAGE) // Abre chat directo
+                    }
+                    else -> { // Para "Grupo de Información General"
+                        Toast.makeText(this, "Abriendo enlace para: ${item.title}", Toast.LENGTH_SHORT).show()
+                        // Aquí puedes poner otro enlace de grupo si tienes uno.
+                    }
+                }
             }
+            // --- FIN LÓGICA CLICKEABLE MODIFICADA ---
 
             container.addView(cardView)
+        }
+    }
+
+
+    // --- FUNCIÓN PARA ABRIR CUALQUIER URL ---
+    private fun openUrl(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(url)
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error: No se pudo abrir la aplicación o el enlace.", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
+
+    // --- FUNCIÓN PARA ABRIR WHATSAPP ---
+
+
+    private fun openWhatsappContact(number: String, message: String) {
+        try {
+            // El número debe estar en formato internacional sin '+'
+            val numberCleaned = number.replace("+", "")
+
+            // Codificar el mensaje para la URL
+            val encodedMessage = Uri.encode(message)
+
+            // Construir la URI para WhatsApp
+            val uri = Uri.parse("https://api.whatsapp.com/send?phone=$numberCleaned&text=$encodedMessage")
+
+            // Crear el Intent para abrir el navegador o la aplicación WhatsApp
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+
+            // Intent.ACTION_VIEW usa la aplicación predeterminada (WhatsApp) o el navegador
+            startActivity(intent)
+
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error al abrir WhatsApp.", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
         }
     }
 
