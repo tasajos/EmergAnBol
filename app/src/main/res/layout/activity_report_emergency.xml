@@ -145,6 +145,48 @@
                     android:layout_height="250dp"
                     android:layout_marginBottom="20dp"/>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📸 Foto del Incidente (Opcional):"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark"
+                    android:layout_marginBottom="8dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <Button
+                        android:id="@+id/btnSeleccionarFoto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Adjuntar Foto"
+                        android:backgroundTint="@color/cat_blue"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"/>
+
+                    <ImageView
+                        android:id="@+id/imgPreview"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@android:drawable/ic_menu_gallery"
+                        android:scaleType="centerCrop"
+                        android:layout_marginStart="16dp"
+                        android:background="#EEEEEE"/>
+
+                    <TextView
+                        android:id="@+id/tvFotoEstado"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ninguna foto seleccionada"
+                        android:textSize="10sp"
+                        android:layout_marginStart="8dp"/>
+                </LinearLayout>
+
                 <Button
                     android:id="@+id/btnReportar"
                     android:layout_width="match_parent"

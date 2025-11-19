@@ -18,6 +18,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.activity.result.contract.ActivityResultContracts
+import android.app.ProgressDialog
 
 // --- IMPORTS DE GOOGLE MAPS Y UBICACIÓN ---
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -30,6 +32,11 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
+// --- IMPORT DE FIREBASE STORAGE ---
+import com.google.firebase.storage.FirebaseStorage
+import java.util.UUID
+
+
 class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
@@ -41,6 +48,18 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
     private val cochabamba = LatLng(-17.4000, -66.1500) // Coordenada de Cochabamba
 
     private var selectedLatLng: LatLng? = null
+
+    // NUEVO: Variable para guardar la URI de la imagen seleccionada en el celular
+    private var selectedImageUri: Uri? = null
+
+    // NUEVO: Lanzador para abrir la galería
+    private val selectImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri != null) {
+            selectedImageUri = uri
+            findViewById<ImageView>(R.id.imgPreview).setImageURI(uri)
+            findViewById<TextView>(R.id.tvFotoEstado).text = "Foto lista para subir"
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,19 +78,92 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Configura la navegación inferior y lógica de clics
         setupBottomNavigation()
-
-
-
         // Botón: Obtener Ubicación
         findViewById<Button>(R.id.btnObtenerUbicacion).setOnClickListener {
             requestLocationPermission()
         }
-
-
-        // Manejar el clic del botón de Reportar
-        findViewById<Button>(R.id.btnReportar).setOnClickListener {
-            enviarReportePorWhatsapp()
+        // NUEVO: Botón para seleccionar foto
+        findViewById<Button>(R.id.btnSeleccionarFoto).setOnClickListener {
+            selectImageLauncher.launch("image/*") // Abre solo imágenes
         }
+
+        // Botón Reportar (Ahora llama a la función inteligente)
+        findViewById<Button>(R.id.btnReportar).setOnClickListener {
+            procesarReporte()
+        }
+    }
+
+
+    // --- LÓGICA PRINCIPAL DEL REPORTE ---
+    private fun procesarReporte() {
+        if (selectedLatLng == null) {
+            Toast.makeText(this, "Por favor, define la ubicación en el mapa.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        // Si hay imagen, primero la subimos, luego enviamos WhatsApp.
+        // Si NO hay imagen, enviamos WhatsApp directo.
+        if (selectedImageUri != null) {
+            subirImagenAFirebaseAndSend()
+        } else {
+            enviarWhatsappFinal("Sin imagen adjunta")
+        }
+    }
+
+    private fun subirImagenAFirebaseAndSend() {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setMessage("Subiendo foto del incidente...")
+        progressDialog.setCancelable(false)
+        progressDialog.show()
+
+        // Nombre único para la imagen
+        val fileName = UUID.randomUUID().toString()
+        val storageRef = FirebaseStorage.getInstance().reference.child("emergencias/$fileName")
+
+        storageRef.putFile(selectedImageUri!!)
+            .addOnSuccessListener {
+                // Subida exitosa -> Ahora pedimos el LINK público
+                storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    progressDialog.dismiss()
+                    val downloadUrl = uri.toString()
+                    enviarWhatsappFinal(downloadUrl) // Enviamos el reporte con el link
+                }
+            }
+            .addOnFailureListener { e ->
+                progressDialog.dismiss()
+                Toast.makeText(this, "Error al subir imagen: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun enviarWhatsappFinal(imageUrlInfo: String) {
+        val descripcion = findViewById<EditText>(R.id.etDescripcion).text.toString()
+        val fecha = findViewById<TextView>(R.id.tvFecha).text.toString()
+        val hora = findViewById<TextView>(R.id.tvHora).text.toString()
+        val estado = findViewById<TextView>(R.id.tvEstado).text.toString()
+
+        val mapsLink = "https://www.google.com/maps/search/?api=1&query=lat,lng?q=${selectedLatLng!!.latitude},${selectedLatLng!!.longitude}"
+
+        // Mensaje Diferente si es Link o Texto "Sin imagen"
+        val textoImagen = if (imageUrlInfo.startsWith("http"))
+            "🖼️ *FOTO DEL INCIDENTE:*\n$imageUrlInfo"
+        else
+            "🖼️ *FOTO:* No adjuntada"
+
+        val mensajeFinal = """
+            🚨 *REPORTE DE EMERGENCIA* 🚨
+            
+            📝 *Descripción:* $descripcion
+            📅 *Fecha:* $fecha  ⏰ *Hora:* $hora
+            📊 *Estado:* $estado
+            
+            $textoImagen
+            
+            📍 *Ubicación Exacta:*
+            $mapsLink
+        """.trimIndent()
+
+        val numeroDestino = "+59170776212"
+        openWhatsappContact(numeroDestino, mensajeFinal)
     }
 
     // --- NUEVO: FUNCIÓN PARA ARMAR Y ENVIAR EL MENSAJE ---
