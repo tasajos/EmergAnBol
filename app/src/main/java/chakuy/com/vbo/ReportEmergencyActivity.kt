@@ -63,7 +63,7 @@ class ReportEmergencyActivity : AppCompatActivity() {
         val navItems = listOf(
            NavItem("Inicio", R.drawable.hogar, "HOME"),
            NavItem("Mapa", R.drawable.ubicaciones, "MAP"),
-            NavItem("Registrar Emergencia", R.drawable.sirena, "REPORT"),
+            NavItem("Emergencia", R.drawable.sirena, "REPORT"),
            NavItem("WhatsApp", R.drawable.whats, "WHATSAPP_DEV"),
             NavItem("Login", R.drawable.seguridad, "LOGIN")
 
