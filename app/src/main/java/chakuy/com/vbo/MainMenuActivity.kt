@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import android.content.Intent
 import android.net.Uri
+import android.widget.ScrollView
 
 class MainMenuActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,7 +24,8 @@ class MainMenuActivity : AppCompatActivity() {
         setupSpinner()
         addCategoryIcons() // Los iconos cuadrados de arriba
         addInfoCards()     // Las nuevas tarjetas rectangulares de abajo
-        addGroupCards() // <-- ¡Añade esta línea!
+        addGroupCards() //
+        setupBottomNavigation() // <-- ¡Añade esta línea!
     }
 
     private fun setupSpinner() {
@@ -217,8 +219,70 @@ class MainMenuActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupBottomNavigation() {
+        val container: LinearLayout = findViewById(R.id.bottom_nav_container)
+        val inflater = LayoutInflater.from(this)
+
+        // IMPORTANTE: Asegúrate de tener estos drawables (PNG) en res/drawable/
+        val navItems = listOf(
+            NavItem("Inicio", R.drawable.hogar, "HOME"),
+            NavItem("Mapa", R.drawable.ubicaciones, "MAP"),
+            NavItem("Reportar Emergencia", R.drawable.sirena, "REPORT"),
+            NavItem("WhatsApp", R.drawable.whats, "WHATSAPP_DEV"),
+            NavItem("Login", R.drawable.seguridad, "LOGIN")
+        )
+
+        for (item in navItems) {
+            // Inflar el diseño de item_bottom_nav.xml
+            val navItemView = inflater.inflate(R.layout.item_bottom_nav, container, false) as LinearLayout
+
+            // Buscar elementos dentro del item
+            val iconView: ImageView = navItemView.findViewById(R.id.nav_icon)
+            val textView: TextView = navItemView.findViewById(R.id.nav_text)
+
+            // Asignar datos
+            iconView.setImageResource(item.iconResId)
+            textView.text = item.title
+
+            // Lógica de clic
+            navItemView.setOnClickListener {
+                handleNavigationClick(item.actionId)
+            }
+
+            container.addView(navItemView)
+        }
+    }
+
+    private fun handleNavigationClick(action: String) {
+        when (action) {
+            "HOME" -> {
+                // Si esta es la MainMenuActivity, simplemente hacemos scroll al inicio
+                val scrollView: ScrollView = findViewById(R.id.scrollView) // Asumiendo que tu ScrollView tiene este ID
+                scrollView.fullScroll(ScrollView.FOCUS_UP)
+                Toast.makeText(this, "Volviendo a la página principal.", Toast.LENGTH_SHORT).show()
+            }
+            "MAP" -> {
+                Toast.makeText(this, "Abriendo el mapa de ubicaciones.", Toast.LENGTH_SHORT).show()
+                // Aquí iría el Intent para abrir MapasActivity
+            }
+            "REPORT" -> {
+                Toast.makeText(this, "Activando reporte de emergencia.", Toast.LENGTH_SHORT).show()
+                // Aquí iría el Intent para abrir ReporteActivity (o marcar número de emergencia)
+            }
+            "WHATSAPP_DEV" -> {
+                // Usamos la función ya creada
+                openWhatsappContact("+59170776212", "Hola, quiero contactar al equipo de desarrollo acerca de la app...")
+            }
+            "LOGIN" -> {
+                Toast.makeText(this, "Abriendo pantalla de inicio de sesión.", Toast.LENGTH_SHORT).show()
+                // Aquí iría el Intent para abrir LoginActivity
+            }
+        }
+    }
+
 }
 // Clases de datos al final del archivo
 data class CategoryItem(val name: String, val imageResId: Int, val bgColor: String)
 data class InfoItem(val title: String, val desc: String, val iconResId: Int)
 data class GroupItem(val title: String, val iconResId: Int)
+data class NavItem(val title: String, val iconResId: Int, val actionId: String)

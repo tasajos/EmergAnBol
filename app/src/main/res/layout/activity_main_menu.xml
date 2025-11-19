@@ -9,6 +9,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
+        android:id="@+id/scrollView"
         android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
@@ -183,10 +184,11 @@
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@android:drawable/ic_menu_compass" android:layout_weight="1" app:tint="@color/text_dark"/>
-        <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@android:drawable/ic_menu_mapmode" android:layout_weight="1" app:tint="@color/cat_green"/>
-        <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@android:drawable/ic_menu_call" android:layout_weight="1" app:tint="@color/whatsapp_green"/>
-        <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@android:drawable/ic_input_add" android:layout_weight="1" app:tint="@color/primary_blue"/>
+        <LinearLayout
+            android:id="@+id/bottom_nav_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"/>
 
     </LinearLayout>
 

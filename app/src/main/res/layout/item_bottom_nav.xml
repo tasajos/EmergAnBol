@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackgroundBorderless">
+
+    <ImageView
+        android:id="@+id/nav_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_help"
+        android:scaleType="fitCenter"
+        android:contentDescription="Icono de navegación"/>
+
+    <TextView
+        android:id="@+id/nav_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Opción"
+        android:textSize="10sp"
+        android:textColor="@color/text_dark"
+        android:maxLines="1"/>
+
+</LinearLayout>
