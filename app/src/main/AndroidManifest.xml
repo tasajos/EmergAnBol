@@ -23,6 +23,7 @@
         </activity>
         <activity android:name=".MainMenuActivity" />
         <activity android:name=".ReportEmergencyActivity" />
+        <activity android:name=".MapsActivity" />
 
     </application>
 </manifest>

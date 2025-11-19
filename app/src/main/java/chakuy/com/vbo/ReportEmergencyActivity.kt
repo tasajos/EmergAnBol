@@ -341,7 +341,7 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(this, "Volviendo a la página principal.", Toast.LENGTH_SHORT).show()
             }
             "MAP" -> {
-                Toast.makeText(this, "Abriendo el mapa de ubicaciones.", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, MapsActivity::class.java))
                 // Aquí iría el Intent para abrir MapasActivity
             }
             "REPORT" -> {
