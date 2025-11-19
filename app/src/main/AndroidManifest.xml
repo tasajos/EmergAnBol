@@ -26,6 +26,8 @@
         <activity android:name=".MapsActivity" />
         <activity android:name=".BomberosListActivity" />
         <activity android:name=".BomberoDetailActivity" />
+        <activity android:name=".AmbulanciasListActivity" />
+        <activity android:name=".AmbulanciaDetailActivity" />
 
     </application>
 </manifest>

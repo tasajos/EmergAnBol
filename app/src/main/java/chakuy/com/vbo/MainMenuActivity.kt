@@ -81,8 +81,10 @@ class MainMenuActivity : AppCompatActivity() {
                     // Si es Bomberos, abrimos la nueva Activity
                     val intent = Intent(this, BomberosListActivity::class.java)
                     startActivity(intent)
+                } else if (category.name == "Ambulancias") {
+                    // ABRIR AMBULANCIAS
+                    startActivity(Intent(this, AmbulanciasListActivity::class.java))
                 } else {
-                    // Para los demás botones, mostramos el mensaje de "En desarrollo" o el nombre
                     Toast.makeText(this, "Clic en ${category.name}", Toast.LENGTH_SHORT).show()
                 }
             }
