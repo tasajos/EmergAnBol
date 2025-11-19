@@ -9,6 +9,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="Emergencia Bolivia Central"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBtLcvUaWZb02JBVg4VfIIMZqMo9ZRd6us" />
 
         <activity
             android:name=".MainActivity"

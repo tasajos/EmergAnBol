@@ -9,12 +9,36 @@ import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import android.content.Intent // Importar Intent para abrir WhatsApp/URL
-import android.net.Uri // Importar Uri para enlaces
-import android.view.LayoutInflater // Importar LayoutInflater para inflar la barra
-import android.widget.ImageView // Importar ImageView para los iconos de la barra
+import android.content.Intent
+import android.net.Uri
+import android.view.LayoutInflater
+import android.widget.ImageView
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
-class ReportEmergencyActivity : AppCompatActivity() {
+// --- IMPORTS DE GOOGLE MAPS Y UBICACIÓN ---
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+
+class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
+
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val LOCATION_PERMISSION_REQUEST_CODE = 1001
+
+    // --- VARIABLES DE MAPS FALTANTES ---
+    private lateinit var googleMap: GoogleMap
+    private var incidentMarker: Marker? = null
+    private val cochabamba = LatLng(-17.4000, -66.1500) // Coordenada de Cochabamba
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,14 +47,20 @@ class ReportEmergencyActivity : AppCompatActivity() {
         // Inicializa la fecha y hora
         initDateTime()
 
+        // Inicializa ubicacion
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // Inicializar el Mapa
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map_container) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
         // Configura la navegación inferior y lógica de clics
         setupBottomNavigation() // ¡Ahora esta función existe!
 
-        // Manejar el clic del botón de ubicación (solo Toast por ahora)
+        // Botón: Obtener Ubicación
         findViewById<Button>(R.id.btnObtenerUbicacion).setOnClickListener {
-            // Lógica pendiente: Solicitar permisos y obtener GPS
-            Toast.makeText(this, "Simulando obtención de GPS...", Toast.LENGTH_SHORT).show()
-            findViewById<TextView>(R.id.tvCoordenadas).text = "Lat: -17.4000, Lon: -66.1500 (Ejemplo)"
+            requestLocationPermission()
         }
 
         // Manejar el clic del botón de Reportar
@@ -38,6 +68,50 @@ class ReportEmergencyActivity : AppCompatActivity() {
             // Lógica de envío de datos del formulario
             Toast.makeText(this, "Reporte Enviado. Gracias.", Toast.LENGTH_LONG).show()
             finish() // Cierra la activity y vuelve al MainMenu
+        }
+    }
+
+    private fun updateMapPin(latLng: LatLng, title: String) {
+        incidentMarker?.remove() // Remover el marcador anterior si existe
+        incidentMarker = googleMap.addMarker(MarkerOptions()
+            .position(latLng)
+            .title(title)
+            .draggable(true))
+
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+    }
+
+    override fun onMapReady(map: GoogleMap) {
+        googleMap = map
+
+        // Mover la cámara inicial a Cochabamba
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cochabamba, 12f))
+
+        // 1. Manejo del Arrastre del Marcador
+        googleMap.setOnMarkerDragListener(object : GoogleMap.OnMarkerDragListener {
+
+            // --- FUNCIONES OBLIGATORIAS AÑADIDAS ---
+            override fun onMarkerDragStart(marker: Marker) {
+                // No es necesario código aquí, pero la función debe existir
+            }
+
+            override fun onMarkerDrag(marker: Marker) {
+                // No es necesario código aquí, pero la función debe existir
+            }
+            // ----------------------------------------
+
+            override fun onMarkerDragEnd(marker: Marker) {
+                val newPosition = marker.position
+                findViewById<TextView>(R.id.tvCoordenadas).text =
+                    String.format("Lat: %.4f, Lon: %.4f (Manual)", newPosition.latitude, newPosition.longitude)
+            }
+        })
+
+        // 2. Manejo del Clic en el Mapa (Registrar otra ubicación)
+        googleMap.setOnMapClickListener { latLng ->
+            updateMapPin(latLng, "Ubicación Registrada Manualmente")
+            findViewById<TextView>(R.id.tvCoordenadas).text =
+                String.format("Lat: %.4f, Lon: %.4f (Manual)", latLng.latitude, latLng.longitude)
         }
     }
 
@@ -50,6 +124,56 @@ class ReportEmergencyActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvHora).text = timeFormat.format(currentDate)
         findViewById<TextView>(R.id.tvEstado).text = "Pendiente"
     }
+
+    private fun requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Solicitar el permiso
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
+        } else {
+            // Permiso ya concedido, obtener ubicación
+            getLastLocation()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getLastLocation() // Permiso concedido
+            } else {
+                Toast.makeText(this, "Permiso de ubicación denegado. No se puede obtener la ubicación actual.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+
+    private fun getLastLocation() {
+        // Verificar si el permiso fue concedido justo antes de usar la ubicación
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return // Salir si el permiso no está disponible (esto no debería ocurrir si requestLocationPermission funciona)
+        }
+
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                val currentLatLng = LatLng(location.latitude, location.longitude)
+
+                // 1. Actualizar el TextView de coordenadas
+                findViewById<TextView>(R.id.tvCoordenadas).text =
+                    String.format("Lat: %.4f, Lon: %.4f (GPS)", location.latitude, location.longitude)
+
+                // 2. Mover y fijar el pin en el mapa
+                updateMapPin(currentLatLng, "Ubicación Actual (GPS)")
+
+            } else {
+                Toast.makeText(this, "Ubicación no disponible. Intente de nuevo.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
 
     // =======================================================
     // --- LÓGICA COPIADA PARA LA BARRA DE NAVEGACIÓN INFERIOR ---

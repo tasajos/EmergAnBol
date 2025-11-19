@@ -138,18 +138,12 @@
                     android:textColor="@color/text_dark"
                     android:layout_marginBottom="8dp"/>
 
-                <FrameLayout
+                <androidx.fragment.app.FragmentContainerView
                     android:id="@+id/map_container"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
                     android:layout_width="match_parent"
                     android:layout_height="250dp"
-                    android:background="#E0E0E0"
-                    android:layout_marginBottom="20dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="[Mapa de Google Maps aquí]"
-                        android:layout_gravity="center"/>
-                </FrameLayout>
+                    android:layout_marginBottom="20dp"/>
 
                 <Button
                     android:id="@+id/btnReportar"
