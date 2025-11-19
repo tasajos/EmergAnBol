@@ -266,8 +266,9 @@ class MainMenuActivity : AppCompatActivity() {
                 // Aquí iría el Intent para abrir MapasActivity
             }
             "REPORT" -> {
-                Toast.makeText(this, "Activando reporte de emergencia.", Toast.LENGTH_SHORT).show()
-                // Aquí iría el Intent para abrir ReporteActivity (o marcar número de emergencia)
+                // Abre ReportEmergencyActivity
+                val intent = Intent(this, ReportEmergencyActivity::class.java)
+                startActivity(intent)
             }
             "WHATSAPP_DEV" -> {
                 // Usamos la función ya creada
@@ -282,7 +283,7 @@ class MainMenuActivity : AppCompatActivity() {
 
 }
 // Clases de datos al final del archivo
-data class CategoryItem(val name: String, val imageResId: Int, val bgColor: String)
-data class InfoItem(val title: String, val desc: String, val iconResId: Int)
-data class GroupItem(val title: String, val iconResId: Int)
-data class NavItem(val title: String, val iconResId: Int, val actionId: String)
+//data class CategoryItem(val name: String, val imageResId: Int, val bgColor: String)
+//data class InfoItem(val title: String, val desc: String, val iconResId: Int)
+//data class GroupItem(val title: String, val iconResId: Int)
+//data class NavItem(val title: String, val iconResId: Int, val actionId: String)
