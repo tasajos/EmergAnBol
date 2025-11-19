@@ -83,11 +83,13 @@ class BomberoDetailActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         // FACEBOOK
+        // Usamos R.id.btnActionFacebook (el ID del layout), NO R.drawable
         findViewById<LinearLayout>(R.id.btnActionFacebook).setOnClickListener {
             openUrl(currentUnit.facebook)
         }
 
         // WEB
+        // Usamos R.id.btnActionWeb (el ID del layout)
         findViewById<LinearLayout>(R.id.btnActionWeb).setOnClickListener {
             openUrl(currentUnit.web)
         }

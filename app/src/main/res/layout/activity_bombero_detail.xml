@@ -107,7 +107,7 @@
                         android:padding="12dp"
                         app:tint="@color/primary_blue"
                         android:elevation="4dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Llamar" android:textSize="12sp" android:layout_marginTop="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Llamar" android:textSize="12sp" android:layout_marginTop="4dp"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -124,7 +124,7 @@
                         android:background="@drawable/bg_circle_white"
                         android:padding="12dp"
                         android:elevation="4dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Chat" android:textSize="12sp" android:layout_marginTop="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chat" android:textSize="12sp" android:layout_marginTop="4dp"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -137,12 +137,12 @@
                     <ImageView
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:src="@android:drawable/ic_menu_share"
+                        android:src="@drawable/facebook"
                         android:background="@drawable/bg_circle_white"
                         android:padding="12dp"
-                        app:tint="#3b5998"
+
                         android:elevation="4dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Face" android:textSize="12sp" android:layout_marginTop="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Face" android:textSize="12sp" android:layout_marginTop="4dp"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -155,12 +155,12 @@
                     <ImageView
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:src="@android:drawable/ic_menu_set_as"
+                        android:src="@drawable/sitioweb"
                         android:background="@drawable/bg_circle_white"
                         android:padding="12dp"
-                        app:tint="@color/cat_orange_real"
+
                         android:elevation="4dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" text="Web" android:textSize="12sp" android:layout_marginTop="4dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Web" android:textSize="12sp" android:layout_marginTop="4dp"/>
                 </LinearLayout>
 
             </LinearLayout>

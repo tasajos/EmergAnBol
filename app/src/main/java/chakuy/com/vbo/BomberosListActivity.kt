@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
-import android.widget.EditText // Importante
+import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +22,7 @@ class BomberosListActivity : AppCompatActivity() {
 
     private lateinit var dbRef: DatabaseReference
     private lateinit var recyclerView: RecyclerView
+    private lateinit var progressBar: ProgressBar
 
     // Dos listas: una para mostrar y otra para guardar todos los datos
     private lateinit var listaCompleta: ArrayList<BomberoUnit>
@@ -31,8 +34,11 @@ class BomberosListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bomberos_list)
 
-        recyclerView = findViewById(R.id.recyclerBomberos)
 
+        progressBar = findViewById(R.id.progressBar)
+        progressBar.visibility = View.VISIBLE // Asegurar que se vea al iniciar
+
+        recyclerView = findViewById(R.id.recyclerBomberos)
         // CAMBIO 1: Grilla de 4 Columnas
         recyclerView.layoutManager = GridLayoutManager(this, 3)
         recyclerView.setHasFixedSize(true)
@@ -68,9 +74,14 @@ class BomberosListActivity : AppCompatActivity() {
                     listaFiltrada.addAll(listaCompleta)
                     adapter.notifyDataSetChanged()
                 }
+// 3. OCULTAR EL SPINNER CUANDO TERMINA LA CARGA
+                progressBar.visibility = View.GONE
+
             }
 
             override fun onCancelled(error: DatabaseError) {
+                // 4. OCULTAR EL SPINNER TAMBIÉN SI HAY ERROR
+                progressBar.visibility = View.GONE
                 Toast.makeText(this@BomberosListActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         })
