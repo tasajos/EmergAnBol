@@ -8,8 +8,15 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide // Importante
 
-class BomberoAdapter(private val listaBomberos: List<BomberoUnit>) :
+class BomberoAdapter(private var listaBomberos: ArrayList<BomberoUnit>) :
     RecyclerView.Adapter<BomberoAdapter.BomberoViewHolder>() {
+
+    // --- NUEVA FUNCIÓN PARA EL BUSCADOR ---
+    fun actualizarLista(nuevaLista: ArrayList<BomberoUnit>) {
+        this.listaBomberos = nuevaLista
+        notifyDataSetChanged() // Avisa a la vista que los datos cambiaron
+    }
+    // --------------------------------------
 
     class BomberoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imgLogo: ImageView = itemView.findViewById(R.id.imgLogo)
@@ -27,22 +34,17 @@ class BomberoAdapter(private val listaBomberos: List<BomberoUnit>) :
         val item = listaBomberos[position]
 
         holder.tvNombre.text = item.nombre ?: "Sin nombre"
-        holder.tvCiudad.text = item.ciudad ?: "Bolivia"
+        holder.tvCiudad.text = item.ciudad ?: ""
 
-        // Usar GLIDE para cargar la imagen desde la URL de Firebase
         if (!item.imagen.isNullOrEmpty()) {
             Glide.with(holder.itemView.context)
                 .load(item.imagen)
-                .circleCrop() // Para que se vea redonda
-                .placeholder(R.drawable.ic_launcher_background) // Imagen mientras carga
-                .error(android.R.drawable.ic_menu_report_image) // Imagen si falla
+                .circleCrop()
+                .placeholder(R.drawable.ic_launcher_background)
                 .into(holder.imgLogo)
         }
 
-        // Aquí puedes agregar el clickListener para ir al detalle más adelante
-        holder.itemView.setOnClickListener {
-            // Lógica para abrir detalles
-        }
+        // Aquí iría tu listener para abrir detalle si lo necesitas
     }
 
     override fun getItemCount(): Int = listaBomberos.size

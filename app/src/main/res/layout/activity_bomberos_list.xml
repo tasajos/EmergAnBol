@@ -35,6 +35,7 @@
         app:layout_constraintTop_toBottomOf="@+id/headerContainer">
 
         <EditText
+            android:id="@+id/etBuscador"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@android:color/transparent"
