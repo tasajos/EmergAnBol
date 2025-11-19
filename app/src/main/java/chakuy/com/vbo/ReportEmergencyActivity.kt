@@ -2,6 +2,7 @@ package chakuy.com.vbo
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -35,10 +36,11 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val LOCATION_PERMISSION_REQUEST_CODE = 1001
 
-    // --- VARIABLES DE MAPS FALTANTES ---
     private lateinit var googleMap: GoogleMap
     private var incidentMarker: Marker? = null
     private val cochabamba = LatLng(-17.4000, -66.1500) // Coordenada de Cochabamba
+
+    private var selectedLatLng: LatLng? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,22 +58,62 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         // Configura la navegación inferior y lógica de clics
-        setupBottomNavigation() // ¡Ahora esta función existe!
+        setupBottomNavigation()
+
+
 
         // Botón: Obtener Ubicación
         findViewById<Button>(R.id.btnObtenerUbicacion).setOnClickListener {
             requestLocationPermission()
         }
 
+
         // Manejar el clic del botón de Reportar
         findViewById<Button>(R.id.btnReportar).setOnClickListener {
-            // Lógica de envío de datos del formulario
-            Toast.makeText(this, "Reporte Enviado. Gracias.", Toast.LENGTH_LONG).show()
-            finish() // Cierra la activity y vuelve al MainMenu
+            enviarReportePorWhatsapp()
         }
     }
 
+    // --- NUEVO: FUNCIÓN PARA ARMAR Y ENVIAR EL MENSAJE ---
+    private fun enviarReportePorWhatsapp() {
+        // 1. Validar que tengamos ubicación
+        if (selectedLatLng == null) {
+            Toast.makeText(this, "Por favor, obtén tu ubicación o marca un punto en el mapa.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        // 2. Obtener los datos del formulario
+        val descripcion = findViewById<EditText>(R.id.etDescripcion).text.toString()
+        val fecha = findViewById<TextView>(R.id.tvFecha).text.toString()
+        val hora = findViewById<TextView>(R.id.tvHora).text.toString()
+        val estado = findViewById<TextView>(R.id.tvEstado).text.toString()
+
+        // 3. Crear el Link de Google Maps
+        // Formato universal: https://www.google.com/maps/search/?api=1&query=lat,lng
+        val mapsLink = "https://www.google.com/maps/search/?api=1&query=${selectedLatLng!!.latitude},${selectedLatLng!!.longitude}"
+
+        // 4. Construir el mensaje con formato (emojis y saltos de linea)
+        val mensajeFinal = """
+            🚨 *REPORTE DE EMERGENCIA* 🚨
+            
+            📝 *Descripción:* $descripcion
+            📅 *Fecha:* $fecha
+            ⏰ *Hora:* $hora
+            📊 *Estado:* $estado
+            
+            📍 *Ubicación Exacta:*
+            $mapsLink
+        """.trimIndent()
+
+        // 5. Enviar al número específico
+        val numeroDestino = "+59170776212" // Tu número objetivo
+        openWhatsappContact(numeroDestino, mensajeFinal)
+    }
+
     private fun updateMapPin(latLng: LatLng, title: String) {
+        // NUEVO: Guardamos la ubicación en la variable global cada vez que el pin se mueve
+        selectedLatLng = latLng
+
         incidentMarker?.remove() // Remover el marcador anterior si existe
         incidentMarker = googleMap.addMarker(MarkerOptions()
             .position(latLng)
@@ -83,25 +125,18 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
-
         // Mover la cámara inicial a Cochabamba
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cochabamba, 12f))
-
         // 1. Manejo del Arrastre del Marcador
         googleMap.setOnMarkerDragListener(object : GoogleMap.OnMarkerDragListener {
 
-            // --- FUNCIONES OBLIGATORIAS AÑADIDAS ---
             override fun onMarkerDragStart(marker: Marker) {
-                // No es necesario código aquí, pero la función debe existir
             }
-
             override fun onMarkerDrag(marker: Marker) {
-                // No es necesario código aquí, pero la función debe existir
             }
-            // ----------------------------------------
-
             override fun onMarkerDragEnd(marker: Marker) {
                 val newPosition = marker.position
+                selectedLatLng = newPosition
                 findViewById<TextView>(R.id.tvCoordenadas).text =
                     String.format("Lat: %.4f, Lon: %.4f (Manual)", newPosition.latitude, newPosition.longitude)
             }
@@ -174,10 +209,6 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-
-    // =======================================================
-    // --- LÓGICA COPIADA PARA LA BARRA DE NAVEGACIÓN INFERIOR ---
-    // =======================================================
 
     private fun setupBottomNavigation() {
         val container: LinearLayout = findViewById(R.id.bottom_nav_container)
