@@ -72,7 +72,20 @@ class MainMenuActivity : AppCompatActivity() {
             layoutParams.marginEnd = resources.getDimensionPixelSize(R.dimen.category_card_margin)
             cardView.layoutParams = layoutParams
 
-            cardView.setOnClickListener { Toast.makeText(this, category.name, Toast.LENGTH_SHORT).show() }
+
+
+
+
+            cardView.setOnClickListener {
+                if (category.name == "Bomberos Voluntarios") {
+                    // Si es Bomberos, abrimos la nueva Activity
+                    val intent = Intent(this, BomberosListActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    // Para los demás botones, mostramos el mensaje de "En desarrollo" o el nombre
+                    Toast.makeText(this, "Clic en ${category.name}", Toast.LENGTH_SHORT).show()
+                }
+            }
             container.addView(cardView)
         }
     }

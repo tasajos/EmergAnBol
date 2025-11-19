@@ -70,4 +70,6 @@ dependencies {
     // <--- AÑADIR ESTA LINEA PARA CORREGIR EL ERROR DE 16 KB
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.datastore:datastore-core:1.1.1")
+    implementation("com.google.firebase:firebase-database:20.3.0") // O la versión que te sugiera AS
+    implementation("com.github.bumptech.glide:glide:4.16.0") // Para cargar las imágenes
 }

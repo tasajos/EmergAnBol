@@ -24,6 +24,7 @@
         <activity android:name=".MainMenuActivity" />
         <activity android:name=".ReportEmergencyActivity" />
         <activity android:name=".MapsActivity" />
+        <activity android:name=".BomberosListActivity" />
 
     </application>
 </manifest>
