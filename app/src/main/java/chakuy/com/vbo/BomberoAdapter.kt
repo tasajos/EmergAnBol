@@ -44,7 +44,14 @@ class BomberoAdapter(private var listaBomberos: ArrayList<BomberoUnit>) :
                 .into(holder.imgLogo)
         }
 
-        // Aquí iría tu listener para abrir detalle si lo necesitas
+        holder.itemView.setOnClickListener {
+            val intent = android.content.Intent(holder.itemView.context, BomberoDetailActivity::class.java)
+
+            // Pasamos el objeto completo gracias a Serializable
+            intent.putExtra("UNIT_DATA", item)
+
+            holder.itemView.context.startActivity(intent)
+    }
     }
 
     override fun getItemCount(): Int = listaBomberos.size

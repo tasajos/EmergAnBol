@@ -1,4 +1,5 @@
 package chakuy.com.vbo
+import java.io.Serializable
 
 // Clases de datos usadas en varias Activities
 data class NavItem(val title: String, val iconResId: Int, val actionId: String)
@@ -17,4 +18,9 @@ data class BomberoUnit(
     val facebook: String? = null,
     val web: String? = null,
     val mapa: String? = null
-)
+): Serializable
+{
+    // ... (tus funciones auxiliares siguen aquí) ...
+    fun getTelefonoString(): String = telefono?.toString() ?: ""
+    fun getWhatsappString(): String = whatsapp?.toString() ?: ""
+}
