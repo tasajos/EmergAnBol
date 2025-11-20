@@ -93,8 +93,11 @@ class MainMenuActivity : AppCompatActivity() {
                     startActivity(Intent(this, EducacionListActivity::class.java))
                 } else if (category.name == "Hospitales") { // <-- NUEVO ENLACE
                     startActivity(Intent(this, HospitalesListActivity::class.java))
+                } else if (category.name == "Canal Whatsapp") { // <--- NUEVA LÓGICA
+                    val channelUrl = "https://whatsapp.com/channel/0029VabE8nN7DAWtEBn6Pq2y"
+                    openUrl(channelUrl) // Usamos la función auxiliar para abrir el enlace
                 } else {
-                    Toast.makeText(this, "Clic en ${category.name}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Click en ${category.name}", Toast.LENGTH_SHORT).show()
                 }
             }
             container.addView(cardView)
