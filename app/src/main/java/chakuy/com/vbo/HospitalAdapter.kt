@@ -56,27 +56,33 @@ class HospitalAdapter(private var lista: ArrayList<HospitalUnit>) :
 
         // 2. Botón UBICACIÓN (Abre Google Maps)
         holder.btnMap.setOnClickListener {
-            val lat = item.latitude
-            val lon = item.longitude
+            // Conversión de coordenadas
+            val lat = item.latitude.toString().toDoubleOrNull()
+            val lon = item.longitude.toString().toDoubleOrNull()
+            val context = holder.itemView.context
 
-            if (lat != null && lon != null && lat != 0.0) {
-                // Abre Google Maps con coordenadas
-                val gmmIntentUri = Uri.parse("geo:$lat,$lon?q=${Uri.encode(item.nombre)}")
+            if (lat != null && lon != null && lat != 0.0 && lon != 0.0) {
+
+                // 1. Crear el nombre para el puntero (Encodeado para que no rompa la URL si tiene espacios)
+                val label = Uri.encode(item.nombre ?: "Ubicación")
+
+                // 2. CORRECCIÓN FINAL: Usamos el parámetro 'q' (Query)
+                // geo:lat,lon?q=lat,lon(Nombre) -> Esto obliga a mostrar el PIN rojo.
+                // &z=18 -> Esto fija el zoom cercano.
+                val uriString = "geo:$lat,$lon?q=$lat,$lon($label)&z=18"
+
+                val gmmIntentUri = Uri.parse(uriString)
                 val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                 mapIntent.setPackage("com.google.android.apps.maps")
 
                 if (mapIntent.resolveActivity(context.packageManager) != null) {
                     context.startActivity(mapIntent)
                 } else {
-                    Toast.makeText(context, "Abriendo mapa en navegador web...", Toast.LENGTH_SHORT).show()
-                    // Si no tiene Google Maps, usa el navegador
-                    val webMapIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://maps.google.com/?q=$lat,$lon"))
-                    context.startActivity(webMapIntent)
+                    // Fallback para navegador (usando las variables lat y lon correctas)
+                    val webUrl = "https://www.google.com/maps/search/?api=1&query=$lat,$lon"
+                    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
+                    context.startActivity(webIntent)
                 }
-            } else if (!item.mapa.isNullOrEmpty()) {
-                // Si solo hay un link de mapa (ej. Google Maps URL en 'mapa')
-                val mapIntent = Intent(Intent.ACTION_VIEW, Uri.parse(item.mapa))
-                context.startActivity(mapIntent)
             } else {
                 Toast.makeText(context, "Ubicación GPS no disponible", Toast.LENGTH_SHORT).show()
             }
