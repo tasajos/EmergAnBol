@@ -8,100 +8,118 @@ data class InfoItem(val title: String, val desc: String, val iconResId: Int)
 data class GroupItem(val title: String, val iconResId: Int)
 
 data class BomberoUnit(
-    val nombre: String? = null,
-    val ciudad: String? = null,
-    val imagen: String? = null, // La URL de la imagen
-    val telefono: Any?= null,
+    override val nombre: String? = null,
+    override val ciudad: String? = null,
+    override val imagen: String? = null, // La URL de la imagen
+    override val telefono: Any?= null,
     val whatsapp: Any? = null,
-    val latitude: Double?= null,
-    val longitude: Double? = null,
+    override val latitude: Double?= null,
+    override val longitude: Double? = null,
     val facebook: String? = null,
     val web: String? = null,
     val mapa: String? = null
-): Serializable
+): Serializable,SearchableUnit
 {
     // ... (tus funciones auxiliares siguen aquí) ...
-    fun getTelefonoString(): String = telefono?.toString() ?: ""
+    override fun getTelefonoString(): String = telefono?.toString() ?: ""
     fun getWhatsappString(): String = whatsapp?.toString() ?: ""
+
 }
 
 data class AmbulanciaUnit(
-    val nombre: String? = null,
-    val ciudad: String? = null,
-    val imagen: String? = null,
-    val telefono: Any? = null, // Usamos Any para evitar errores de String/Long
+    override val nombre: String? = null,
+    override val ciudad: String? = null,
+    override val imagen: String? = null,
+    override val telefono: Any? = null, // Usamos Any para evitar errores de String/Long
     val whatsapp: Any? = null,
-    val latitude: Double? = null,
-    val longitude: Double? = null,
+    override val latitude: Double? = null,
+    override val longitude: Double? = null,
     val facebook: String? = null,
     val web: String? = null,
     val mapa: String? = null
-) : Serializable
+) : Serializable,SearchableUnit
 {
     // ... (tus funciones auxiliares siguen aquí) ...
-    fun getTelefonoString(): String = telefono?.toString() ?: ""
+    override fun getTelefonoString(): String = telefono?.toString() ?: ""
     fun getWhatsappString(): String = whatsapp?.toString() ?: ""
 }
 
 data class AnimalistaUnit(
-    val nombre: String? = null,
-    val ciudad: String? = null,
-    val imagen: String? = null,
-    val telefono: Any? = null,
+    override val nombre: String? = null,
+    override val ciudad: String? = null,
+    override val imagen: String? = null,
+    override val telefono: Any? = null,
     val whatsapp: Any? = null,
-    val latitude: Double? = null,
-    val longitude: Double? = null,
+    override val latitude: Double? = null,
+    override val longitude: Double? = null,
     val facebook: String? = null,
     val web: String? = null,
     val mapa: String? = null
-) : Serializable {
-    fun getTelefonoString(): String = telefono?.toString() ?: ""
+) : Serializable,SearchableUnit {
+    override fun getTelefonoString(): String = telefono?.toString() ?: ""
     fun getWhatsappString(): String = whatsapp?.toString() ?: ""
 }
 
 data class AmbientalistasUnit(
-    val nombre: String? = null,
-    val ciudad: String? = null,
-    val imagen: String? = null,
-    val telefono: Any? = null,
+    override val nombre: String? = null,
+    override val ciudad: String? = null,
+    override val imagen: String? = null,
+    override  val telefono: Any? = null,
     val whatsapp: Any? = null,
-    val latitude: Double? = null,
-    val longitude: Double? = null,
+    override val latitude: Double? = null,
+    override val longitude: Double? = null,
     val facebook: String? = null,
     val web: String? = null,
     val mapa: String? = null
-) : Serializable {
-    fun getTelefonoString(): String = telefono?.toString() ?: ""
+) : Serializable,SearchableUnit  {
+    override fun getTelefonoString(): String = telefono?.toString() ?: ""
     fun getWhatsappString(): String = whatsapp?.toString() ?: ""
 }
 
 data class EducacionUnit(
-    val nombre: String? = null,
-    val ciudad: String? = null,
-    val imagen: String? = null,
-    val telefono: Any? = null,
+    override val nombre: String? = null,
+    override val ciudad: String? = null,
+    override val imagen: String? = null,
+    override val telefono: Any? = null,
     val whatsapp: Any? = null,
-    val latitude: Double? = null,
-    val longitude: Double? = null,
+    override val latitude: Double? = null,
+    override val longitude: Double? = null,
     val facebook: String? = null,
     val web: String? = null,
     val mapa: String? = null
-)  :Serializable {
-    fun getTelefonoString(): String = telefono?.toString() ?: ""
+)  :Serializable,SearchableUnit  {
+    override fun getTelefonoString(): String = telefono?.toString() ?: ""
     fun getWhatsappString(): String = whatsapp?.toString() ?: ""
 }
 data class HospitalUnit(
-    val nombre: String? = null,
-    val ciudad: String? = null,
-    val imagen: String? = null, // No se usará, pero mantenemos la estructura
-    val telefono: Any? = null,
+    override val nombre: String? = null,
+    override val ciudad: String? = null,
+    override val imagen: String? = null, // No se usará, pero mantenemos la estructura
+    override val telefono: Any? = null,
     val whatsapp: Any? = null,
-    val latitude: Double? = null,
-    val longitude: Double? = null,
+    override val latitude: Double? = null,
+    override val longitude: Double? = null,
     val facebook: String? = null,
     val web: String? = null,
     val mapa: String? = null
-) : Serializable {
-    fun getTelefonoString(): String = telefono?.toString() ?: ""
+) :Serializable,SearchableUnit {
+    override fun getTelefonoString(): String = telefono?.toString() ?: ""
     fun getWhatsappString(): String = whatsapp?.toString() ?: ""
 }
+interface SearchableUnit : Serializable {
+    val nombre: String?
+    val ciudad: String?
+    val imagen: String? // Necesario para mostrar la imagen en el modal
+    val telefono: Any?
+    val latitude: Double?
+    val longitude: Double?
+    fun getTelefonoString(): String // Asegúrate de que esta función exista en todos los modelos
+}
+data class SimpleSearchResult(
+    val nombre: String,
+    val telefono: String,
+    val ciudad: String,
+    val imageUrl: String?,
+    val lat: Double?,
+    val lon: Double?
+)

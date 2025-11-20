@@ -5,39 +5,164 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.app.AlertDialog // Para el modal de resultados
+import android.util.Log
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.*
+import java.util.Locale
 import androidx.cardview.widget.CardView
 import android.content.Intent
 import android.net.Uri
 import android.widget.ScrollView
 
 class MainMenuActivity : AppCompatActivity() {
+
+    // Rutas de Firebase a buscar
+    private val FIREBASE_PATHS = listOf(
+        "epr", // Asumimos que Bomberos está aquí
+        "hospitales",
+        "ambulancia",
+        "animalistas",
+        "ambientalistas",
+        "educacion"
+    )
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_menu)
 
-        setupSpinner()
+        // Nota: La inicialización del buscador DEBE ir aquí
+        setupGlobalSearch()
         addCategoryIcons() // Los iconos cuadrados de arriba
         addInfoCards()     // Las nuevas tarjetas rectangulares de abajo
         addGroupCards() //
         setupBottomNavigation() // <-- ¡Añade esta línea!
     }
 
-    private fun setupSpinner() {
-        // ... (Tu código del spinner se mantiene igual) ...
-        val spinner: Spinner = findViewById(R.id.spinnerCiudad)
-        val ciudades = arrayOf("Seleccionar Ciudad", "La Paz", "Cochabamba", "Santa Cruz")
-        val adapter = ArrayAdapter(this, R.layout.item_spinner_elegant, ciudades)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
+    private fun setupGlobalSearch() {
+        val etBuscadorGlobal = findViewById<EditText>(R.id.etBuscadorGlobal)
+        val btnSearchGlobal = findViewById<ImageView>(R.id.btnSearchGlobal)
+
+        btnSearchGlobal.setOnClickListener {
+            val query = etBuscadorGlobal.text.toString().trim()
+            if (query.isNotEmpty()) {
+                performGlobalSearch(query)
+            } else {
+                Toast.makeText(this, "Por favor, ingresa un término de búsqueda.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
-    // ... (Tu función addCategoryIcons se mantiene igual) ...
+    private fun performGlobalSearch(query: String) {
+        val db = FirebaseDatabase.getInstance()
+        val allResults = mutableListOf<SimpleSearchResult>()
+
+        var completedTasks = 0
+        val totalTasks = FIREBASE_PATHS.size
+
+        Toast.makeText(this, "Buscando '$query' en ${totalTasks} secciones...", Toast.LENGTH_LONG).show()
+
+        for (path in FIREBASE_PATHS) {
+            val dbRef = db.getReference(path)
+
+            dbRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (ds in snapshot.children) {
+
+                        val unit: SearchableUnit? = try {
+                            // 1. Mapeamos directamente al tipo concreto
+                            val mappedUnit: SearchableUnit? = when (path) {
+                                "epr" -> ds.getValue(BomberoUnit::class.java)
+                                "hospitales" -> ds.getValue(HospitalUnit::class.java)
+                                "ambulancia" -> ds.getValue(AmbulanciaUnit::class.java)
+                                "animalistas" -> ds.getValue(AnimalistaUnit::class.java)
+                                "ambientalistas" -> ds.getValue(AmbientalistasUnit::class.java)
+                                "educacion" -> ds.getValue(EducacionUnit::class.java)
+                                else -> null
+                            }
+                            mappedUnit // Usamos el resultado
+                        } catch (e: Exception) {
+                            Log.e("Search", "Error al mapear unidad en $path: ${e.message}")
+                            null
+                        }
+
+                        if (unit != null) {
+                            val normalizedQuery = query.lowercase(Locale.getDefault())
+
+                            // 2. Ejecutar la lógica de búsqueda
+                            val nameMatch = unit.nombre?.lowercase(Locale.getDefault())?.contains(normalizedQuery) == true
+                            val cityMatch = unit.ciudad?.lowercase(Locale.getDefault())?.contains(normalizedQuery) == true
+
+                            if (nameMatch || cityMatch) {
+                                allResults.add(SimpleSearchResult(
+                                    nombre = unit.nombre ?: "N/A",
+                                    telefono = unit.getTelefonoString(),
+                                    ciudad = unit.ciudad ?: "N/A",
+                                    imageUrl = unit.imagen,
+                                    lat = unit.latitude,
+                                    lon = unit.longitude
+                                ))
+                            }
+                        }
+                    }
+
+                    completedTasks++
+                    if (completedTasks == totalTasks) {
+                        showResultModal(allResults)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("FirebaseSearch", "Búsqueda fallida en $path: ${error.message}")
+                    completedTasks++
+                    if (completedTasks == totalTasks) {
+                        showResultModal(allResults)
+                    }
+                }
+            })
+        }
+    }
+
+    private fun showResultModal(results: List<SimpleSearchResult>) {
+        if (results.isEmpty()) {
+            AlertDialog.Builder(this)
+                .setTitle("Sin Resultados")
+                .setMessage("No se encontraron unidades o servicios que coincidan con la búsqueda.")
+                .setPositiveButton("Aceptar") { dialog, _ -> dialog.dismiss() }
+                .show()
+            return
+        }
+
+        // Inflar el layout custom del modal
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_results, null)
+        val recyclerView = dialogView.findViewById<RecyclerView>(R.id.recyclerSearchResults)
+        val tvResultCount = dialogView.findViewById<TextView>(R.id.tvResultCount)
+
+        tvResultCount.text = "Resultados encontrados: ${results.size}"
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        // **IMPORTANTE:** Necesitas crear la clase SearchResultAdapter.kt (del paso anterior)
+        val adapter = SearchResultAdapter(results)
+        recyclerView.adapter = adapter
+
+        // Mostrar el modal
+        AlertDialog.Builder(this)
+            .setTitle("Resultados de Búsqueda Global")
+            .setView(dialogView)
+            .setPositiveButton("Cerrar") { dialog, _ -> dialog.dismiss() }
+            .show()
+
+}
+
     private fun addCategoryIcons() {
         val container: LinearLayout = findViewById(R.id.category_icons_container)
         val categories = listOf(
@@ -71,8 +196,6 @@ class MainMenuActivity : AppCompatActivity() {
             val layoutParams = cardView.layoutParams as LinearLayout.LayoutParams
             layoutParams.marginEnd = resources.getDimensionPixelSize(R.dimen.category_card_margin)
             cardView.layoutParams = layoutParams
-
-
 
 
 
@@ -306,9 +429,11 @@ class MainMenuActivity : AppCompatActivity() {
                 // Aquí iría el Intent para abrir LoginActivity
             }
         }
-    }
 
-}
+    } }
+
+
+
 // Clases de datos al final del archivo
 //data class CategoryItem(val name: String, val imageResId: Int, val bgColor: String)
 //data class InfoItem(val title: String, val desc: String, val iconResId: Int)
