@@ -6,13 +6,13 @@ plugins {
 
 android {
     namespace = "chakuy.com.vbo"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "chakuy.com.vbo"
         minSdk = 23
-        targetSdk = 34
-        versionCode = 66
+        targetSdk = 35
+        versionCode = 70
         versionName = "3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -24,6 +24,14 @@ android {
             storePassword = "vallegrande2135"
             keyAlias = "tasajos"
             keyPassword = "vallegrande2135"
+        }
+    }
+
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+
         }
     }
 
@@ -39,12 +47,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     buildFeatures {
@@ -60,16 +68,16 @@ configurations.all {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.10.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("androidx.core:core-ktx:1.17.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("com.google.android.material:material:1.13.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+    implementation("com.google.android.gms:play-services-maps:19.2.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation(libs.firebase.storage)
     // <--- AÑADIR ESTA LINEA PARA CORREGIR EL ERROR DE 16 KB
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.datastore:datastore-core:1.1.1")
-    implementation("com.google.firebase:firebase-database:20.3.0") // O la versión que te sugiera AS
-    implementation("com.github.bumptech.glide:glide:4.16.0") // Para cargar las imágenes
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.datastore:datastore-core:1.1.7")
+    implementation("com.google.firebase:firebase-database:22.0.1") // O la versión que te sugiera AS
+    implementation("com.github.bumptech.glide:glide:5.0.5") // Para cargar las imágenes
 }
