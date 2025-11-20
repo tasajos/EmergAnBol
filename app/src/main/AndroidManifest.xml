@@ -32,6 +32,8 @@
         <activity android:name=".AnimalistaDetailActivity" />
         <activity android:name=".AmbientalistasListActivity" />
         <activity android:name=".AmbientalistasDetailActivity" />
+        <activity android:name=".EducacionListActivity" />
+        <activity android:name=".EducacionDetailActivity" />
 
     </application>
 </manifest>

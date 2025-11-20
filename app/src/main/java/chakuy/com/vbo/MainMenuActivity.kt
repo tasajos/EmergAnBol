@@ -89,8 +89,10 @@ class MainMenuActivity : AppCompatActivity() {
                     startActivity(Intent(this, AnimalistasListActivity::class.java))
                 } else if (category.name == "Ambientalistas") { // <-- NUEVO ENLACE
                     startActivity(Intent(this, AmbientalistasListActivity::class.java))
+                } else if (category.name == "Educacion") { // <-- NUEVO ENLACE
+                    startActivity(Intent(this, EducacionListActivity::class.java))
                 } else {
-                    Toast.makeText(this, "Clic en ${category.name}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Click en ${category.name}", Toast.LENGTH_SHORT).show()
                 }
             }
             container.addView(cardView)
