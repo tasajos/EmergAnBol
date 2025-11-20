@@ -84,8 +84,11 @@ class MainMenuActivity : AppCompatActivity() {
                 } else if (category.name == "Ambulancias") {
                     // ABRIR AMBULANCIAS
                     startActivity(Intent(this, AmbulanciasListActivity::class.java))
-                } else {
-                    Toast.makeText(this, "Clic en ${category.name}", Toast.LENGTH_SHORT).show()
+                } else if (category.name == "Animalistas") {
+                    // ABRIR ANIMALISTAS
+                    startActivity(Intent(this, AnimalistasListActivity::class.java))
+                }else {
+                    Toast.makeText(this, "Click en ${category.name}", Toast.LENGTH_SHORT).show()
                 }
             }
             container.addView(cardView)

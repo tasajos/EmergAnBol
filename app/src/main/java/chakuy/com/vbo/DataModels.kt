@@ -11,7 +11,7 @@ data class BomberoUnit(
     val nombre: String? = null,
     val ciudad: String? = null,
     val imagen: String? = null, // La URL de la imagen
-    val telefono: Any?= null, // En tu imagen aparece como número, puede ser Long o String
+    val telefono: Any?= null,
     val whatsapp: Any? = null,
     val latitude: Double?= null,
     val longitude: Double? = null,
@@ -39,6 +39,22 @@ data class AmbulanciaUnit(
 ) : Serializable
 {
     // ... (tus funciones auxiliares siguen aquí) ...
+    fun getTelefonoString(): String = telefono?.toString() ?: ""
+    fun getWhatsappString(): String = whatsapp?.toString() ?: ""
+}
+
+data class AnimalistaUnit(
+    val nombre: String? = null,
+    val ciudad: String? = null,
+    val imagen: String? = null,
+    val telefono: Any? = null,
+    val whatsapp: Any? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val facebook: String? = null,
+    val web: String? = null,
+    val mapa: String? = null
+) : Serializable {
     fun getTelefonoString(): String = telefono?.toString() ?: ""
     fun getWhatsappString(): String = whatsapp?.toString() ?: ""
 }
