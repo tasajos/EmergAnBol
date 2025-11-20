@@ -24,6 +24,7 @@ class HospitalAdapter(private var lista: ArrayList<HospitalUnit>) :
         val tvCiudad: TextView = itemView.findViewById(R.id.tvHospitalCity)
         val btnCall: ImageView = itemView.findViewById(R.id.btnHospitalCall)
         val btnMap: ImageView = itemView.findViewById(R.id.btnHospitalMap)
+        val btnShare: ImageView = itemView.findViewById(R.id.btnHospitalShare)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -80,7 +81,48 @@ class HospitalAdapter(private var lista: ArrayList<HospitalUnit>) :
                 Toast.makeText(context, "Ubicación GPS no disponible", Toast.LENGTH_SHORT).show()
             }
         }
+
+// 3. Botón COMPARTIR (NUEVA LÓGICA)
+        holder.btnShare.setOnClickListener {
+            shareHospitalDetails(context, item)
+        }
+
     }
 
     override fun getItemCount(): Int = lista.size
+    // --- FUNCIÓN AUXILIAR PARA COMPARTIR DATOS ---
+    private fun shareHospitalDetails(context: android.content.Context, hospital: HospitalUnit) {
+        val phone = hospital.getTelefonoString()
+
+        // CORRECCIÓN AQUÍ:
+        // No usamos 'lat' ni 'lon' sueltos. Usamos 'hospital.latitude' y 'hospital.longitude'.
+        val locationText = if (hospital.latitude != null && hospital.latitude != 0.0) {
+            // Construimos el link usando las propiedades del objeto hospital
+            "📍 Ubicación GPS: https://maps.google.com/?q=${hospital.latitude},${hospital.longitude}"
+        } else {
+            "Ubicación no registrada."
+        }
+
+        // 2. Construir el mensaje formateado
+        val shareMessage = """
+            🏥 *DETALLE DEL HOSPITAL* 🏥
+            
+            Nombre: ${hospital.nombre ?: "N/A"}
+            Ciudad: ${hospital.ciudad ?: "N/A"}
+            📞 Teléfono: ${phone.ifEmpty { "N/A" }}
+            
+            $locationText
+            
+            ¡Mantente seguro! #EmergenciaBolivia
+        """.trimIndent()
+
+        // 3. Crear Intent Universal
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, shareMessage)
+        }
+
+        // Usamos Intent.createChooser
+        context.startActivity(Intent.createChooser(shareIntent, "Compartir detalles por..."))
+    }
 }
