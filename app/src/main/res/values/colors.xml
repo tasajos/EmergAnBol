@@ -26,4 +26,6 @@
     <color name="whatsapp_green">#25D366</color>
     <color name="coord_blue">#7986CB</color>
 
+    <color name="text_muted">#6C757D</color>
+
 </resources>

@@ -90,3 +90,18 @@ data class EducacionUnit(
     fun getTelefonoString(): String = telefono?.toString() ?: ""
     fun getWhatsappString(): String = whatsapp?.toString() ?: ""
 }
+data class HospitalUnit(
+    val nombre: String? = null,
+    val ciudad: String? = null,
+    val imagen: String? = null, // No se usará, pero mantenemos la estructura
+    val telefono: Any? = null,
+    val whatsapp: Any? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val facebook: String? = null,
+    val web: String? = null,
+    val mapa: String? = null
+) : Serializable {
+    fun getTelefonoString(): String = telefono?.toString() ?: ""
+    fun getWhatsappString(): String = whatsapp?.toString() ?: ""
+}

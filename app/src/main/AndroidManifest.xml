@@ -34,6 +34,7 @@
         <activity android:name=".AmbientalistasDetailActivity" />
         <activity android:name=".EducacionListActivity" />
         <activity android:name=".EducacionDetailActivity" />
+        <activity android:name=".HospitalesListActivity" />
 
     </application>
 </manifest>
