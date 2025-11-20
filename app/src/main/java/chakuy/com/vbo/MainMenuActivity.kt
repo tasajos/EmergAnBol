@@ -234,10 +234,11 @@ class MainMenuActivity : AppCompatActivity() {
 
         // Define aquí tus datos: Título, Descripción, Icono
         val infoItems = listOf(
+
             InfoItem(
-                "Kits de Emergencia",
-                "Herramientas e insumos necesarios para eventos adversos.",
-                R.drawable.kitdesupervivencia // icono de maletín de emergencia
+                "Noticias",
+                "Últimas actualizaciones sobre emergencias en el país.",
+                R.drawable.reportero // Icono de periódico/visión
             ),
             InfoItem(
                 "Eventos",
@@ -250,10 +251,11 @@ class MainMenuActivity : AppCompatActivity() {
                 R.drawable.caridad // Icono de persona o corazón
             ),
             InfoItem(
-                "Noticias",
-                "Últimas actualizaciones sobre emergencias en el país.",
-               R.drawable.reportero // Icono de periódico/visión
+                "Kits de Emergencia",
+                "Herramientas e insumos necesarios para eventos adversos.",
+                R.drawable.kitdesupervivencia // icono de maletín de emergencia
             )
+
         )
 
         val inflater = LayoutInflater.from(this)
