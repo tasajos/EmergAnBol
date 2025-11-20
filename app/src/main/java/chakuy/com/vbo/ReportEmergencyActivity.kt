@@ -20,6 +20,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.activity.result.contract.ActivityResultContracts
 import android.app.ProgressDialog
+import android.util.Log
 
 // --- IMPORTS DE GOOGLE MAPS Y UBICACIÓN ---
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -32,9 +33,12 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
+
 // --- IMPORT DE FIREBASE STORAGE ---
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.DatabaseReference
 
 
 class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -49,8 +53,11 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var selectedLatLng: LatLng? = null
 
-    // NUEVO: Variable para guardar la URI de la imagen seleccionada en el celular
+    // Variable para guardar la URI de la imagen seleccionada en el celular
     private var selectedImageUri: Uri? = null
+
+    // NUEVO: Referencia a la base de datos
+    private lateinit var dbEmergencias: DatabaseReference
 
     // NUEVO: Lanzador para abrir la galería
     private val selectImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -61,12 +68,55 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private fun saveReportToDatabase(imageUrl: String, mapsLink: String) {
+        val titulo = "Reporte Automático - ${findViewById<TextView>(R.id.tvFecha).text}"
+        val descripcion = findViewById<EditText>(R.id.etDescripcion).text.toString()
+        val estado = findViewById<TextView>(R.id.tvEstado).text.toString()
+        val fecha = findViewById<TextView>(R.id.tvFecha).text.toString()
+        val hora = findViewById<TextView>(R.id.tvHora).text.toString()
+
+        // Asumimos un teléfono responsable fijo para el ejemplo
+        val telefonoResponsable = "+59170776212"
+
+        // Creamos el objeto (Map) para registrarlo
+        val emergencyMap = HashMap<String, Any?>()
+        emergencyMap["titulo"] = titulo
+        emergencyMap["ciudad"] = "Detectada o por seleccionar" // Puedes añadir lógica de ciudad aquí
+        emergencyMap["descripcion"] = descripcion
+        emergencyMap["estado"] = estado // Estado inicial: Pendiente
+        emergencyMap["fecha"] = fecha
+        emergencyMap["hora"] = hora
+        emergencyMap["imagen"] = if (imageUrl.startsWith("http")) imageUrl else "N/A"
+        emergencyMap["subestado"] = "Pendiente"
+        emergencyMap["telefonoResponsable"] = telefonoResponsable
+        emergencyMap["tipo"] = "Usuario Reporta"
+        emergencyMap["ubicacion"] = mapsLink // Link de Google Maps
+
+        // Generar una clave única
+        val emergencyId = dbEmergencias.push().key
+
+        if (emergencyId != null) {
+            dbEmergencias.child(emergencyId).setValue(emergencyMap)
+                .addOnSuccessListener {
+                    Log.d("Firebase", "Reporte de emergencia guardado con éxito: $emergencyId")
+                    Toast.makeText(this, "✅ Reporte Registrado y Enviado a WhatsApp.", Toast.LENGTH_LONG).show()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "⚠️ Error al guardar en la base de datos.", Toast.LENGTH_LONG).show()
+                }
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_report_emergency)
 
         // Inicializa la fecha y hora
         initDateTime()
+
+        // Inicialización de la referencia de la base de datos
+        dbEmergencias = FirebaseDatabase.getInstance().getReference("ultimasEmergencias")
 
         // Inicializa ubicacion
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -142,6 +192,9 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
         val estado = findViewById<TextView>(R.id.tvEstado).text.toString()
 
         val mapsLink = "https://www.google.com/maps/search/?api=1&query=lat,lng?q=${selectedLatLng!!.latitude},${selectedLatLng!!.longitude}"
+
+        //GUARDAR EN FIREBASE ANTES DE ENVIAR WHATSAPP
+        saveReportToDatabase(imageUrlInfo, mapsLink) // <--- ¡NUEVA LLAMADA!
 
         // Mensaje Diferente si es Link o Texto "Sin imagen"
         val textoImagen = if (imageUrlInfo.startsWith("http"))
