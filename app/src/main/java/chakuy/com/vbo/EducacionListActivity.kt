@@ -34,7 +34,7 @@ class EducacionListActivity : AppCompatActivity() {
         progressBar.visibility = View.VISIBLE
 
         recyclerView = findViewById(R.id.recyclerAmbulancias) // O el ID que tengas
-        recyclerView.layoutManager = GridLayoutManager(this, 3)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.setHasFixedSize(true)
 
         listaCompleta = arrayListOf()

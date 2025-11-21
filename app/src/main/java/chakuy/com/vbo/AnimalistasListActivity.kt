@@ -34,7 +34,7 @@ class AnimalistasListActivity : AppCompatActivity() {
         progressBar.visibility = View.VISIBLE
 
         recyclerView = findViewById(R.id.recyclerAmbulancias) // Si copiaste el XML, el ID puede ser el mismo o cámbialo a recyclerAnimalistas
-        recyclerView.layoutManager = GridLayoutManager(this, 3)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.setHasFixedSize(true)
 
         listaCompleta = arrayListOf()

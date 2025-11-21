@@ -35,7 +35,7 @@ class AmbulanciasListActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
 
         recyclerView = findViewById(R.id.recyclerAmbulancias)
-        recyclerView.layoutManager = GridLayoutManager(this, 3) // 3 columnas
+        recyclerView.layoutManager = GridLayoutManager(this, 2) // 3 columnas
         recyclerView.setHasFixedSize(true)
 
         listaCompleta = arrayListOf()

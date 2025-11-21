@@ -34,7 +34,7 @@ class AmbientalistasListActivity : AppCompatActivity() {
         progressBar.visibility = View.VISIBLE
 
         recyclerView = findViewById(R.id.recyclerAmbulancias) // O el ID que tenga tu RecyclerView
-        recyclerView.layoutManager = GridLayoutManager(this, 3)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.setHasFixedSize(true)
 
         listaCompleta = arrayListOf()
