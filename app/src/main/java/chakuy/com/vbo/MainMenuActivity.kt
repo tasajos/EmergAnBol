@@ -52,13 +52,32 @@ class MainMenuActivity : AppCompatActivity() {
         val etBuscadorGlobal = findViewById<EditText>(R.id.etBuscadorGlobal)
         val btnSearchGlobal = findViewById<ImageView>(R.id.btnSearchGlobal)
 
+        // 1. Manejar el clic en el botón de la lupa (existente)
         btnSearchGlobal.setOnClickListener {
-            val query = etBuscadorGlobal.text.toString().trim()
-            if (query.isNotEmpty()) {
-                performGlobalSearch(query)
-            } else {
-                Toast.makeText(this, "Por favor, ingresa un término de búsqueda.", Toast.LENGTH_SHORT).show()
+            triggerSearch(etBuscadorGlobal)
+        }
+
+        // 2. MANEJAR EL EVENTO DE 'ENTER' DEL TECLADO
+        etBuscadorGlobal.setOnEditorActionListener { v, actionId, event ->
+            // Chequeamos si la acción es 'Buscar' o 'Listo' (usamos 6 que es el código de ACTION_DONE/SEARCH)
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH || actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                triggerSearch(etBuscadorGlobal)
+                // Ocultar el teclado después de la búsqueda
+                val inputMethodManager = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                inputMethodManager.hideSoftInputFromWindow(v.windowToken, 0)
+                return@setOnEditorActionListener true
             }
+            false
+        }
+    }
+
+    // NUEVA FUNCIÓN AUXILIAR PARA EVITAR DUPLICACIÓN DE CÓDIGO
+    private fun triggerSearch(etBuscador: EditText) {
+        val query = etBuscador.text.toString().trim()
+        if (query.isNotEmpty()) {
+            performGlobalSearch(query)
+        } else {
+            Toast.makeText(this, "Por favor, ingresa un término de búsqueda.", Toast.LENGTH_SHORT).show()
         }
     }
 
