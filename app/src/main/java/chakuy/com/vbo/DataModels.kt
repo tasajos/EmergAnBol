@@ -123,3 +123,10 @@ data class SimpleSearchResult(
     val lat: Double?,
     val lon: Double?
 )
+
+data class Noticia(
+    val titulo: String? = null,
+    val contenido: String? = null,
+    val imagen: String? = null, // URL de la imagen principal
+    val fuente: String? = null  // URL de la fuente original
+) :Serializable

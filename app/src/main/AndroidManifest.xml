@@ -35,6 +35,7 @@
         <activity android:name=".EducacionListActivity" />
         <activity android:name=".EducacionDetailActivity" />
         <activity android:name=".HospitalesListActivity" />
+        <activity android:name=".NoticiasListActivity" />
 
     </application>
 </manifest>

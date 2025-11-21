@@ -275,7 +275,11 @@ class MainMenuActivity : AppCompatActivity() {
             // iconView.setColorFilter(getColor(R.color.primary_blue))
 
             cardView.setOnClickListener {
-                Toast.makeText(this, "Abriendo: ${item.title}", Toast.LENGTH_SHORT).show()
+                if (item.title == "Noticias") {
+                    startActivity(Intent(this, NoticiasListActivity::class.java))
+                } else {
+                    Toast.makeText(this, "Abriendo: ${item.title}", Toast.LENGTH_SHORT).show()
+                }
             }
 
             container.addView(cardView)
