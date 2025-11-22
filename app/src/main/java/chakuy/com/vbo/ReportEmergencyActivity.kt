@@ -75,6 +75,14 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
         val fecha = findViewById<TextView>(R.id.tvFecha).text.toString()
         val hora = findViewById<TextView>(R.id.tvHora).text.toString()
 
+// Crear el link aquí para asegurar que ambos usen el mismo valor
+        val latitude = selectedLatLng!!.latitude
+        val longitude = selectedLatLng!!.longitude
+
+
+        // FORMATO CORREGIDO: URI para guardar en Firebase
+        val finalMapsLink = "http://maps.google.com/maps?q=${latitude},${longitude}"
+
         // Asumimos un teléfono responsable fijo para el ejemplo
         val telefonoResponsable = "+59170776212"
 
@@ -90,7 +98,8 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
         emergencyMap["subestado"] = "Pendiente"
         emergencyMap["telefonoResponsable"] = telefonoResponsable
         emergencyMap["tipo"] = "Usuario Reporta"
-        emergencyMap["ubicacion"] = mapsLink // Link de Google Maps
+        //emergencyMap["ubicacion"] = mapsLink // Link de Google Maps
+        emergencyMap["ubicacion"] = finalMapsLink
 
         // Generar una clave única
         val emergencyId = dbEmergencias.push().key
@@ -191,7 +200,12 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
         val hora = findViewById<TextView>(R.id.tvHora).text.toString()
         val estado = findViewById<TextView>(R.id.tvEstado).text.toString()
 
-        val mapsLink = "https://www.google.com/maps/search/?api=1&query=lat,lng?q=${selectedLatLng!!.latitude},${selectedLatLng!!.longitude}"
+        // --- CORRECCIÓN CLAVE ---
+        val latitude = selectedLatLng!!.latitude
+        val longitude = selectedLatLng!!.longitude
+
+        // FORMATO CORREGIDO: Usamos la sintaxis de interpolación correcta para la URL
+        val mapsLink = "http://maps.google.com/maps?q=${latitude},${longitude}"
 
         //GUARDAR EN FIREBASE ANTES DE ENVIAR WHATSAPP
         saveReportToDatabase(imageUrlInfo, mapsLink) // <--- ¡NUEVA LLAMADA!
