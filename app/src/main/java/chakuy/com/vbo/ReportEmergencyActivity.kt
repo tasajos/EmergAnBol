@@ -21,6 +21,9 @@ import androidx.core.content.ContextCompat
 import androidx.activity.result.contract.ActivityResultContracts
 import android.app.ProgressDialog
 import android.util.Log
+import androidx.appcompat.app.AlertDialog // Importante para el menú de elección
+import androidx.core.content.FileProvider // Importante para la cámara
+import java.io.File // Importante para crear el archivo de la foto
 
 // --- IMPORTS DE GOOGLE MAPS Y UBICACIÓN ---
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -46,12 +49,16 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val LOCATION_PERMISSION_REQUEST_CODE = 1001
+    private val CAMERA_PERMISSION_REQUEST_CODE = 1002
 
     private lateinit var googleMap: GoogleMap
     private var incidentMarker: Marker? = null
     private val cochabamba = LatLng(-17.4000, -66.1500) // Coordenada de Cochabamba
 
     private var selectedLatLng: LatLng? = null
+
+    // NUEVO: Variable para guardar la URI temporal de la foto tomada con la cámara
+    private var latestTmpUri: Uri? = null
 
     // Variable para guardar la URI de la imagen seleccionada en el celular
     private var selectedImageUri: Uri? = null
@@ -67,6 +74,23 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
             findViewById<TextView>(R.id.tvFotoEstado).text = "Foto lista para subir"
         }
     }
+
+    // 2. NUEVO: LANZADOR CÁMARA
+    private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess ->
+        if (isSuccess && latestTmpUri != null) {
+            mostrarImagenSeleccionada(latestTmpUri!!)
+        } else {
+            Toast.makeText(this, "No se tomó la foto o hubo un error", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // NUEVO: Función auxiliar para actualizar la UI con la imagen
+    private fun mostrarImagenSeleccionada(uri: Uri) {
+        selectedImageUri = uri
+        findViewById<ImageView>(R.id.imgPreview).setImageURI(uri)
+        findViewById<TextView>(R.id.tvFotoEstado).text = "Foto lista para subir"
+    }
+
 
     private fun saveReportToDatabase(imageUrl: String, mapsLink: String) {
         val titulo = "Reporte Automático - ${findViewById<TextView>(R.id.tvFecha).text}"
@@ -137,13 +161,15 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Configura la navegación inferior y lógica de clics
         setupBottomNavigation()
+
+
         // Botón: Obtener Ubicación
         findViewById<Button>(R.id.btnObtenerUbicacion).setOnClickListener {
             requestLocationPermission()
         }
-        // NUEVO: Botón para seleccionar foto
+        // MODIFICADO: El botón ahora abre un diálogo de elección
         findViewById<Button>(R.id.btnSeleccionarFoto).setOnClickListener {
-            selectImageLauncher.launch("image/*") // Abre solo imágenes
+            mostrarDialogoSeleccionFoto()
         }
 
         // Botón Reportar (Ahora llama a la función inteligente)
@@ -151,6 +177,52 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
             procesarReporte()
         }
     }
+    // --- NUEVO: Diálogo para elegir Cámara o Galería ---
+    private fun mostrarDialogoSeleccionFoto() {
+        val opciones = arrayOf("Tomar Foto (Cámara)", "Seleccionar de Galería")
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Adjuntar fotografía")
+        builder.setItems(opciones) { _, which ->
+            when (which) {
+                0 -> checkCameraPermissionAndOpen() // Opción Cámara
+                1 -> selectImageLauncher.launch("image/*") // Opción Galería
+            }
+        }
+        builder.show()
+    }
+
+
+    // --- NUEVO: Permisos y Apertura de Cámara ---
+    private fun checkCameraPermissionAndOpen() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
+        } else {
+            abrirCamara()
+        }
+    }
+
+
+
+    private fun abrirCamara() {
+        try {
+            // Crear archivo temporal
+            val tmpFile = File.createTempFile("tmp_image_file", ".png", cacheDir).apply {
+                createNewFile()
+                deleteOnExit()
+            }
+
+            // Obtener URI segura
+            latestTmpUri = FileProvider.getUriForFile(applicationContext, "${packageName}.provider", tmpFile)
+
+            // Lanzar cámara
+            takePictureLauncher.launch(latestTmpUri)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Error al abrir la cámara: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
 
 
     // --- LÓGICA PRINCIPAL DEL REPORTE ---
@@ -193,6 +265,29 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(this, "Error al subir imagen: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
+    // Manejo de respuesta de permisos (Actualizado para incluir cámara)
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            LOCATION_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    getLastLocation()
+                } else {
+                    Toast.makeText(this, "Permiso de ubicación requerido", Toast.LENGTH_SHORT).show()
+                }
+            }
+            CAMERA_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    abrirCamara()
+                } else {
+                    Toast.makeText(this, "Permiso de cámara requerido para tomar fotos", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
 
     private fun enviarWhatsappFinal(imageUrlInfo: String) {
         val descripcion = findViewById<EditText>(R.id.etDescripcion).text.toString()
@@ -333,16 +428,6 @@ class ReportEmergencyActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLastLocation() // Permiso concedido
-            } else {
-                Toast.makeText(this, "Permiso de ubicación denegado. No se puede obtener la ubicación actual.", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
 
 
     private fun getLastLocation() {
