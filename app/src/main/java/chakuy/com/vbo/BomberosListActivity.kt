@@ -40,7 +40,7 @@ class BomberosListActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerBomberos)
         // CAMBIO 1: Grilla de 4 Columnas
-        recyclerView.layoutManager = GridLayoutManager(this, 3)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.setHasFixedSize(true)
 
         listaCompleta = arrayListOf()
