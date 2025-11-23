@@ -130,3 +130,16 @@ data class Noticia(
     val imagen: String? = null, // URL de la imagen principal
     val fuente: String? = null  // URL de la fuente original
 ) :Serializable
+
+data class EmergenciaReporte(
+    val titulo: String? = null,
+    val descripcion: String? = null,
+    val ciudad: String? = null,
+    val estado: String? = null, // Ej: "En proceso", "Pendiente", "Finalizado"
+    val fecha: String? = null,
+    val hora: String? = null,
+    val imagen: String? = null, // URL de la foto
+    val ubicacion: String? = null, // Link de Google Maps
+    val tipo: String? = null, // Ej: "Rescate", "Incendio"
+    val asignadoA: String? = null // Ej: "Yunka Atoq"
+) : Serializable

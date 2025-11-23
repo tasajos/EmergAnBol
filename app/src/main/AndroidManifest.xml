@@ -37,6 +37,7 @@
         <activity android:name=".EducacionDetailActivity" />
         <activity android:name=".HospitalesListActivity" />
         <activity android:name=".NoticiasListActivity" />
+        <activity android:name=".EmergenciasFeedActivity" />
 
 
         <provider

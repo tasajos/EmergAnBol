@@ -260,9 +260,9 @@ class MainMenuActivity : AppCompatActivity() {
                 R.drawable.reportero // Icono de periódico/visión
             ),
             InfoItem(
-                "Eventos",
-                "Talleres, simulacros y capacitaciones cercanas.",
-                R.drawable.evento // Icono de calendario/lista
+                "Emergencias actuales",
+                "Equipos trabajando en emergencias, y reportes de asistencias",
+                R.drawable.sirena // Icono de calendario/lista
             ),
             InfoItem(
                 "Voluntariado",
@@ -296,6 +296,8 @@ class MainMenuActivity : AppCompatActivity() {
             cardView.setOnClickListener {
                 if (item.title == "Noticias") {
                     startActivity(Intent(this, NoticiasListActivity::class.java))
+                } else if (item.title == "Emergencias actuales") { // <-- NUEVO
+                    startActivity(Intent(this, EmergenciasFeedActivity::class.java))
                 } else {
                     Toast.makeText(this, "Abriendo: ${item.title}", Toast.LENGTH_SHORT).show()
                 }
