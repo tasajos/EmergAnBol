@@ -12,8 +12,8 @@ android {
         applicationId = "chakuy.com.vbo"
         minSdk = 23
         targetSdk = 35
-        versionCode = 74
-        versionName = "Orion 3.4"
+        versionCode = 75
+        versionName = "Orion 3.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

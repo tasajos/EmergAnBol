@@ -4,87 +4,176 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.widget.Button // Importante
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
-import androidx.appcompat.app.AlertDialog
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.BitmapDescriptorFactory // Importante para iconos personalizados
-import com.google.android.material.floatingactionbutton.FloatingActionButton // Importante para el FAB
+import com.google.android.material.bottomsheet.BottomSheetDialog // Importante
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.*
+import com.bumptech.glide.Glide // Importante para la imagen
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var googleMap: GoogleMap
-
-    // Coordenada central (Ej: Cochabamba Centro)
+    private lateinit var dbRef: DatabaseReference
     private val defaultLocation = LatLng(-17.3935, -66.1570)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
 
-        // 1. Inicializar el Mapa
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map_full_fragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // 2. Configurar la barra inferior
         setupBottomNavigation()
 
-// NUEVO: Añadir un Floating Action Button para la leyenda
-        val fabLeyenda: FloatingActionButton = findViewById(R.id.fab_leyenda)
-        fabLeyenda.setOnClickListener {
+        findViewById<FloatingActionButton>(R.id.fab_leyenda).setOnClickListener {
             showLegendDialog()
-
         }
-
     }
 
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
-
-        // Mover la cámara a la ubicación por defecto
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 14f))
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 13f))
         googleMap.uiSettings.isZoomControlsEnabled = true
 
+        // --- CARGA DE MARCADORES ---
+        // Pasamos la CLASE específica para que Firebase sepa cómo convertirlo
+        loadMarkersFromFirebase("epr", R.drawable.bomberosvoluntarios, BomberoUnit::class.java)
+        loadMarkersFromFirebase("hospitales", R.drawable.hospital, HospitalUnit::class.java)
+        loadMarkersFromFirebase("ambulancia", R.drawable.ambulancias, AmbulanciaUnit::class.java)
+        loadMarkersFromFirebase("animalistas", R.drawable.animalistas, AnimalistaUnit::class.java)
 
-
-        // Añadir marcadores de ejemplo (Hospitales, Estaciones, etc.)
-        googleMap.addMarker(MarkerOptions().position(defaultLocation).title("Centro de la Ciudad"))
-
-        // Ejemplo: Puedes añadir más marcadores aquí manualmente
-        googleMap.addMarker(MarkerOptions().position(LatLng(-17.37, -66.15)).title("Hospital Viedma").snippet("Servicios de Emergencia 24h").icon(getSmallIcon(R.drawable.hospital)))
-        googleMap.addMarker(MarkerOptions().position(LatLng(-17.3807, -66.1594)).title("Bomberos Voluntarios Sar Bolivia").snippet("Servicios de Emergencia 24h").icon(getSmallIcon(R.drawable.bomberosvoluntarios)))
-        googleMap.addMarker(MarkerOptions().position(LatLng(-17.3691, -66.1309)).title("Bomberos Voluntarios Yunka Atoq").snippet("Servicios de Emergencia 24h").icon(getSmallIcon(R.drawable.bomberosvoluntarios)))
-
-        // Habilitar controles de zoom
-        googleMap.uiSettings.isZoomControlsEnabled = true
-    }
-        // NUEVO: Función para mostrar el diálogo de leyenda
-        private fun showLegendDialog() {
-            val builder = AlertDialog.Builder(this)
-            val inflater = layoutInflater
-            val dialogView = inflater.inflate(R.layout.dialog_legend, null)
-            builder.setView(dialogView)
-            builder.setPositiveButton("Cerrar") { dialog, _ ->
-                dialog.dismiss()
+        // --- LISTENER DE CLIC EN MARCADOR ---
+        googleMap.setOnMarkerClickListener { marker ->
+            // Recuperamos el objeto guardado en el Tag
+            val unitData = marker.tag as? SearchableUnit
+            if (unitData != null) {
+                showBottomSheet(unitData) // Mostramos el detalle
+            } else {
+                // Es un marcador estático o sin datos (como el del centro)
+                marker.showInfoWindow()
             }
-            val dialog = builder.create()
-            dialog.show()
+            true // Devuelve true para indicar que consumimos el evento (no abrir infoWindow default)
+        }
     }
 
-    // --- LÓGICA DE NAVEGACIÓN (Copiada para que funcione el menú) ---
+    // --- FUNCIÓN GENÉRICA ACTUALIZADA ---
+    // Ahora recibe el tipo de clase (clazz) para convertir los datos correctamente
+    private fun <T : SearchableUnit> loadMarkersFromFirebase(path: String, iconResId: Int, clazz: Class<T>) {
+        dbRef = FirebaseDatabase.getInstance().getReference(path)
+
+        dbRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (unitSnap in snapshot.children) {
+                        // Convertimos al objeto específico (BomberoUnit, HospitalUnit, etc)
+                        val unit = unitSnap.getValue(clazz)
+
+                        if (unit != null && unit.latitude != null && unit.longitude != null) {
+                            val location = LatLng(unit.latitude!!, unit.longitude!!)
+
+                            val marker = googleMap.addMarker(
+                                MarkerOptions()
+                                    .position(location)
+                                    .title(unit.nombre)
+                                    .icon(getSmallIcon(iconResId))
+                            )
+
+                            // ¡TRUCO!: Guardamos todo el objeto dentro del marcador
+                            marker?.tag = unit
+                        }
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    // --- MOSTRAR BOTTOM SHEET ---
+    private fun showBottomSheet(unit: SearchableUnit) {
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.layout_map_detail_sheet, null)
+        dialog.setContentView(view)
+
+        // Vincular vistas
+        val tvTitle = view.findViewById<TextView>(R.id.sheetTitle)
+        val tvCity = view.findViewById<TextView>(R.id.sheetCity)
+        val tvPhone = view.findViewById<TextView>(R.id.sheetPhone)
+        val imgView = view.findViewById<ImageView>(R.id.sheetImage)
+        val btnCall = view.findViewById<Button>(R.id.btnSheetCall)
+        val btnWapp = view.findViewById<Button>(R.id.btnSheetWhatsapp)
+
+        // Llenar datos
+        tvTitle.text = unit.nombre
+        tvCity.text = unit.ciudad ?: "Bolivia"
+        tvPhone.text = unit.getTelefonoString()
+
+        // Cargar Imagen con Glide
+        if (!unit.imagen.isNullOrEmpty()) {
+            Glide.with(this).load(unit.imagen).circleCrop().into(imgView)
+        } else {
+            imgView.setImageResource(R.drawable.hogar) // Imagen por defecto si no hay
+        }
+
+        // Acción Llamar
+        btnCall.setOnClickListener {
+            val phone = unit.getTelefonoString()
+            if (phone.isNotEmpty()) {
+                startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
+            } else {
+                Toast.makeText(this, "Sin teléfono", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Acción WhatsApp (Intenta obtener whatsapp, si no usa telefono)
+        btnWapp.setOnClickListener {
+            // Como SearchableUnit no obliga a tener getWhatsappString en la interfaz (depende de tu DataModels),
+            // intentamos castear o usar telefono como fallback.
+            // Si añadiste getWhatsappString() a la interfaz SearchableUnit en el paso anterior, úsalo directo.
+            // Si no, usaremos el teléfono:
+            val wapp = unit.getTelefonoString()
+            openWhatsappContact(wapp, "Hola, vi su ubicación en el mapa de Emergencias.")
+        }
+
+        dialog.show()
+    }
+
+    private fun getSmallIcon(drawableId: Int): BitmapDescriptor {
+        val height = 100
+        val width = 100
+        val bitmap = android.graphics.BitmapFactory.decodeResource(resources, drawableId)
+        val smallMarker = android.graphics.Bitmap.createScaledBitmap(bitmap, width, height, false)
+        return BitmapDescriptorFactory.fromBitmap(smallMarker)
+    }
+
+    private fun showLegendDialog() {
+        val builder = AlertDialog.Builder(this)
+        val view = layoutInflater.inflate(R.layout.dialog_legend, null)
+        builder.setView(view)
+        builder.setPositiveButton("Cerrar") { d, _ -> d.dismiss() }
+        builder.create().show()
+    }
+
+    // ... (Tus funciones de Navegación setupBottomNavigation y handleNavigationClick siguen igual) ...
     private fun setupBottomNavigation() {
         val container: LinearLayout = findViewById(R.id.bottom_nav_container)
         val inflater = LayoutInflater.from(this)
-
         val navItems = listOf(
             NavItem("Inicio", R.drawable.hogar, "HOME"),
             NavItem("Mapa", R.drawable.ubicaciones, "MAP"),
@@ -92,49 +181,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             NavItem("WhatsApp", R.drawable.whats, "WHATSAPP_DEV"),
             NavItem("Login", R.drawable.seguridad, "LOGIN")
         )
-
         for (item in navItems) {
             val navItemView = inflater.inflate(R.layout.item_bottom_nav, container, false) as LinearLayout
             val iconView: ImageView = navItemView.findViewById(R.id.nav_icon)
             val textView: TextView = navItemView.findViewById(R.id.nav_text)
-
             iconView.setImageResource(item.iconResId)
             textView.text = item.title
-
-            // Resaltar el icono si estamos en MAPA (Opcional visual)
             if (item.actionId == "MAP") {
-                textView.setTextColor(getColor(R.color.primary_blue))
-                iconView.setColorFilter(getColor(R.color.primary_blue))
+                textView.setTextColor(ContextCompat.getColor(this, R.color.primary_blue))
+                iconView.setColorFilter(ContextCompat.getColor(this, R.color.primary_blue))
             }
-
             navItemView.setOnClickListener { handleNavigationClick(item.actionId) }
             container.addView(navItemView)
         }
     }
 
-
-    // --- FUNCIÓN PARA REDIMENSIONAR ICONOS ---
-    private fun getSmallIcon(drawableId: Int): com.google.android.gms.maps.model.BitmapDescriptor {
-        val height = 100 // Altura deseada en pixeles (ajusta este valor si quieres más grande/pequeño)
-        val width = 100  // Ancho deseado
-        val bitmap = android.graphics.BitmapFactory.decodeResource(resources, drawableId)
-        val smallMarker = android.graphics.Bitmap.createScaledBitmap(bitmap, width, height, false)
-        return BitmapDescriptorFactory.fromBitmap(smallMarker)
-    }
-
     private fun handleNavigationClick(action: String) {
         when (action) {
-            "HOME" -> {
-                val intent = Intent(this, MainMenuActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                startActivity(intent)
-            }
-            "MAP" -> {
-                Toast.makeText(this, "Ya estás viendo el mapa.", Toast.LENGTH_SHORT).show()
-            }
-            "REPORT" -> {
-                startActivity(Intent(this, ReportEmergencyActivity::class.java))
-            }
+            "HOME" -> { startActivity(Intent(this, MainMenuActivity::class.java)); finish() }
+            "MAP" -> Toast.makeText(this, "Estás en el mapa", Toast.LENGTH_SHORT).show()
+            "REPORT" -> startActivity(Intent(this, ReportEmergencyActivity::class.java))
             "WHATSAPP_DEV" -> openWhatsappContact("+59170776212", "Hola...")
             "LOGIN" -> Toast.makeText(this, "Login...", Toast.LENGTH_SHORT).show()
         }
@@ -142,12 +208,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun openWhatsappContact(number: String, message: String) {
         try {
-            val numberCleaned = number.replace("+", "").replace(" ", "")
-            val encodedMessage = Uri.encode(message)
-            val uri = Uri.parse("https://api.whatsapp.com/send?phone=$numberCleaned&text=$encodedMessage")
+            val uri = Uri.parse("https://api.whatsapp.com/send?phone=${number.replace("+", "")}&text=${Uri.encode(message)}")
             startActivity(Intent(Intent.ACTION_VIEW, uri))
-        } catch (e: Exception) {
-            Toast.makeText(this, "Error al abrir WhatsApp", Toast.LENGTH_SHORT).show()
-        }
+        } catch (e: Exception) { }
     }
 }
